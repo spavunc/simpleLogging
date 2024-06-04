@@ -66,4 +66,12 @@
 		</plugins>
 	</build>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>simple-logging</name>
+            <url>https://maven.pkg.github.com/spavunc/simpleLogging</url>
+        </repository>
+    </distributionManagement>
+
 </project>
