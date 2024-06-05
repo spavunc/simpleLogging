@@ -129,7 +129,6 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
   }
 
   private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
-    // Check for SkipLogging annotation on class
     HandlerExecutionChain handler = getHandler(request);
     if (handler != null && handler.getHandler() instanceof HandlerMethod handlerMethod) {
       handlerMethod = (HandlerMethod) handler.getHandler();
