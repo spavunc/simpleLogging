@@ -3,9 +3,13 @@ package com.simple.logging.configuration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.*;
+
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.util.ContentCachingRequestWrapper;
@@ -23,32 +27,32 @@ import java.nio.file.Paths;
 public class LoggableDispatcherServlet extends DispatcherServlet {
 
   private static final Logger LOGGER = Logger.getLogger(LoggableDispatcherServlet.class.getName());
-  private final Integer MAX_STRING_SIZE_MB;
-  private final Integer MAX_FILE_SIZE_MB;
-  private final String LOG_FILE_PATH;
+  private final Integer maxStringSizeMb;
+  private final Integer maxFileSizeMb;
+  private final String logFilePath;
 
   public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath) {
-    this.MAX_FILE_SIZE_MB = maxFileSize * 1024 * 1024; // Convert MB to bytes
-    this.MAX_STRING_SIZE_MB = maxStringSize * 1024 * 1024;
-    this.LOG_FILE_PATH = logFilePath;
+    this.maxFileSizeMb = maxFileSize * 1024 * 1024; // Convert MB to bytes
+    this.maxStringSizeMb = maxStringSize * 1024 * 1024;
+    this.logFilePath = logFilePath;
     setupLogger();
   }
 
   private void setupLogger() {
     try {
       // Ensure logs directory exists
-      Path logsPath = Paths.get(LOG_FILE_PATH);
+      Path logsPath = Paths.get(logFilePath);
       if (!Files.exists(logsPath)) {
         Files.createDirectories(logsPath);
       }
 
-      // Define log filename with date and time
-      DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-      String dateTime = LocalDateTime.now().format(dtf);
+      // Define log filename with date
+      DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+      String dateTime = LocalDate.now().format(dtf);
       Path logFile = logsPath.resolve("application-" + dateTime + ".log");
 
       // Create FileHandler with size limit and rotating file pattern
-      FileHandler fileHandler = new FileHandler(logFile.toString(), MAX_FILE_SIZE_MB, 1, true);
+      FileHandler fileHandler = new FileHandler(logFile.toString(), maxFileSizeMb, 1, true);
       fileHandler.setFormatter(new CustomLogFormatter());
 
       // Add the FileHandler to the logger
@@ -79,7 +83,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     }
   }
 
-  private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler) {
+  private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler)
+    throws IOException {
     LOGGER.info(() -> "HTTP METHOD - " + requestToCache.getMethod());
     LOGGER.info("REQUEST URL - " + requestToCache.getRequestURL());
     getRequestPayload(requestToCache);
@@ -96,7 +101,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     }
   }
 
-  private void getResponsePayload(HttpServletResponse response) {
+  private void getResponsePayload(HttpServletResponse response) throws IOException {
+    updateResponse(response);
     ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
     if (wrapper != null) {
       byte[] byteArray = wrapper.getContentAsByteArray();
@@ -105,10 +111,10 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
   }
 
   private void printWrapper(byte[] byteArray) {
-    if (byteArray.length > 0 && byteArray.length < MAX_STRING_SIZE_MB) {
+    if (byteArray.length > 0 && byteArray.length < maxStringSizeMb) {
       String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
       LOGGER.info(jsonStringFromByteArray);
-    } else if (byteArray.length > MAX_STRING_SIZE_MB) {
+    } else if (byteArray.length > maxStringSizeMb) {
       LOGGER.info("Content too long!");
     }
   }
@@ -124,6 +130,16 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     LOGGER.log(Level.SEVERE, "Exception occurred - ", ex);
   }
 
+  private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
+    // Check for SkipLogging annotation on class
+    HandlerExecutionChain handler = getHandler(request);
+    HandlerMethod handlerMethod = handler != null ? (HandlerMethod) handler.getHandler() : null;
+    if (handlerMethod == null || handlerMethod.getBean().getClass().isAnnotationPresent(IgnoreLogging.class)) {
+      return false;
+    } else
+      return !handlerMethod.getMethod().isAnnotationPresent(IgnoreLogging.class);
+  }
+
   private void executeLogDispatch(HttpServletRequest request, HttpServletResponse response,
     @NotNull HandlerExecutionChain handler) throws Exception {
     try {
@@ -132,8 +148,9 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
       logException(ex);
       throw ex; // rethrow the exception after logging
     } finally {
-      log(request, response, handler);
-      updateResponse(response);
+      if (shouldLogRequest(request)) {
+        log(request, response, handler);
+      }
     }
   }
 

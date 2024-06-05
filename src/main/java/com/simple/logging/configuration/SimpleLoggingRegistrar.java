@@ -7,10 +7,12 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
+import java.util.Arrays;
+
 public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
 
   @Override
-  public void registerBeanDefinitions(@NotNull AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+  public void registerBeanDefinitions(@NotNull AnnotationMetadata importingClassMetadata, @NotNull BeanDefinitionRegistry registry) {
     AnnotationAttributes
       attributes = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(SimpleLogging.class.getName()));
     assert attributes != null;
