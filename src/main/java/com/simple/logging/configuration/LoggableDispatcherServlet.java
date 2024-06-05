@@ -5,8 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
 import java.util.logging.*;
 
 import org.springframework.web.method.HandlerMethod;
@@ -133,11 +131,14 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
   private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
     // Check for SkipLogging annotation on class
     HandlerExecutionChain handler = getHandler(request);
-    HandlerMethod handlerMethod = handler != null ? (HandlerMethod) handler.getHandler() : null;
-    if (handlerMethod == null || handlerMethod.getBean().getClass().isAnnotationPresent(IgnoreLogging.class)) {
-      return false;
-    } else
-      return !handlerMethod.getMethod().isAnnotationPresent(IgnoreLogging.class);
+    if (handler != null && handler.getHandler() instanceof HandlerMethod handlerMethod) {
+      handlerMethod = (HandlerMethod) handler.getHandler();
+      if (handlerMethod.getBean().getClass().isAnnotationPresent(IgnoreLogging.class)) {
+        return false;
+      } else
+        return !handlerMethod.getMethod().isAnnotationPresent(IgnoreLogging.class);
+    }
+    return false;
   }
 
   private void executeLogDispatch(HttpServletRequest request, HttpServletResponse response,

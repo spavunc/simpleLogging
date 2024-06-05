@@ -7,8 +7,6 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
-import java.util.Arrays;
-
 public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
 
   @Override
