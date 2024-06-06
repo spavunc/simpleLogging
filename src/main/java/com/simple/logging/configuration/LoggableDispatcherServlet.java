@@ -138,7 +138,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         getResponsePayload(responseToCache, log);
 
         // Delete first element if the list is overflown
-        if (PayloadHistory.viewLogs().size() > maxCacheHistoryLogs) {
+        if (PayloadHistory.viewLogs().size() >= maxCacheHistoryLogs) {
             PayloadHistory.viewLogs().removeFirst();
         }
 
