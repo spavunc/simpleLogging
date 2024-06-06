@@ -5,11 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-import java.util.logging.Formatter;
-import java.util.logging.LogRecord;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 /**
  * CustomLogFormatter is a custom formatter for Java's logging framework.
  * It formats log messages with a timestamp, log level, and the log message itself.

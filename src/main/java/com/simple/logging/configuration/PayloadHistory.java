@@ -4,21 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PayloadHistory {
-    private static final List<Payload> payloadHistory = new ArrayList<>();
+
+    private PayloadHistory() {
+      throw new IllegalStateException("Utility class");
+    }
+
+    private static final List<Payload> payloadHistoryList = new ArrayList<>();
 
     public static synchronized void addLog(Payload log) {
-        payloadHistory.add(log);
+        payloadHistoryList.add(log);
     }
 
     public static synchronized void removeLog(Payload log) {
-        payloadHistory.remove(log);
+        payloadHistoryList.remove(log);
     }
 
     public static synchronized void clearLog() {
-        payloadHistory.clear();
+        payloadHistoryList.clear();
     }
 
     public static synchronized List<Payload> viewLogs() {
-        return payloadHistory;
+        return payloadHistoryList;
     }
 }
