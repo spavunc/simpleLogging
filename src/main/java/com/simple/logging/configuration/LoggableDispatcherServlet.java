@@ -57,7 +57,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
       fileHandler.setFormatter(new CustomLogFormatter());
       fileHandler.setEncoding(Charset.forName(charset, StandardCharsets.UTF_8).toString());
 
-      // Add the FileHandler to the logger
+      // Add the FileHandler to the logger.
       LOGGER.addHandler(fileHandler);
       LOGGER.setLevel(Level.ALL); // Log all levels
       LOGGER.setUseParentHandlers(false); // Disable console logging, if desired
