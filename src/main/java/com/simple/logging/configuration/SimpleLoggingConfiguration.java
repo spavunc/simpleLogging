@@ -16,11 +16,15 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
   private final Integer maxFileSize;
   private final Integer maxStringSize;
   private final String logFilePath;
+  private final String charset;
+
   public SimpleLoggingConfiguration(@Value("${maxFileSize}") Integer maxFileSize,
-    @Value("${maxStringSize}") Integer maxStringSize, @Value("${logFilePath}") String logFilePath) {
+    @Value("${maxStringSize}") Integer maxStringSize, @Value("${logFilePath}") String logFilePath,
+    @Value("${charset}") String charset) {
     this.maxFileSize = maxFileSize;
     this.maxStringSize = maxStringSize;
     this.logFilePath = logFilePath;
+    this.charset = charset;
   }
 
   @Bean
@@ -30,7 +34,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
 
   @Bean(name = "loggingDispatcherServlet")
   public DispatcherServlet dispatcherServlet() {
-    return new LoggableDispatcherServlet(maxFileSize, maxStringSize, logFilePath);
+    return new LoggableDispatcherServlet(maxFileSize, maxStringSize, logFilePath, charset);
   }
 
 }

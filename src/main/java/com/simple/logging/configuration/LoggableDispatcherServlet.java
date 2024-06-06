@@ -3,6 +3,7 @@ package com.simple.logging.configuration;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.*;
@@ -28,11 +29,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
   private final Integer maxStringSizeMb;
   private final Integer maxFileSizeMb;
   private final String logFilePath;
+  private final String charset;
 
-  public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath) {
+  public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath, String charset) {
     this.maxFileSizeMb = maxFileSize * 1024 * 1024; // Convert MB to bytes
     this.maxStringSizeMb = maxStringSize * 1024 * 1024;
     this.logFilePath = logFilePath;
+    this.charset = charset;
     setupLogger();
   }
 
@@ -52,6 +55,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
       // Create FileHandler with size limit and rotating file pattern
       FileHandler fileHandler = new FileHandler(logFile.toString(), maxFileSizeMb, 1, true);
       fileHandler.setFormatter(new CustomLogFormatter());
+      fileHandler.setEncoding(Charset.forName(charset, StandardCharsets.UTF_8).toString());
 
       // Add the FileHandler to the logger
       LOGGER.addHandler(fileHandler);

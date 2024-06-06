@@ -14,4 +14,5 @@ public @interface SimpleLogging {
   int maxFileSize() default 50;
   int maxStringSize() default 5;
   String logFilePath() default "logs";
+  String charset() default "UTF-8";
 }
