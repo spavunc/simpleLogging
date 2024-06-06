@@ -107,7 +107,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             assert handler != null;
             executeLogDispatch(request, response, handler);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred - ", ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Exception occurred - {0}", ex.getMessage());
         }
     }
 
@@ -182,13 +182,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param isPayloadResponse indicates if the payload is a response.
      * @param log               the payload log object.
      */
-    private void printWrapper(byte[] byteArray, Boolean isPayloadResponse, Payload log) {
+    private void printWrapper(byte[] byteArray, boolean isPayloadResponse, Payload log) {
         if (byteArray.length > 0 && byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
             LOGGER.info(jsonStringFromByteArray);
 
             // Check whether the payload is a response or a request
-            if (Boolean.TRUE.equals(isPayloadResponse)) {
+            if (isPayloadResponse) {
                 log.setResponseBody(jsonStringFromByteArray);
             } else {
                 log.setRequestBody(jsonStringFromByteArray);
@@ -242,7 +242,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         try {
             super.doDispatch(request, response);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred - ", ex.getMessage());
+            LOGGER.log(Level.SEVERE, "Exception occurred - {0}", ex.getMessage());
             throw ex; // rethrow the exception after logging
         } finally {
             if (shouldLogRequest(request)) {
