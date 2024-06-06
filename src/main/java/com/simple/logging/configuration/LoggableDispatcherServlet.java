@@ -22,6 +22,13 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * LoggableDispatcherServlet is a custom implementation of Spring's DispatcherServlet that logs
+ * incoming HTTP requests and outgoing HTTP responses.
+ *
+ * <p>It supports logging the requests and responses with configurable size limits, logging file
+ * paths, charset, and cache history.</p>
+ */
 public class LoggableDispatcherServlet extends DispatcherServlet {
 
     private static final Logger LOGGER = Logger.getLogger(LoggableDispatcherServlet.class.getName());
@@ -31,6 +38,15 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private final String charset;
     private final Integer maxCacheHistoryLogs;
 
+    /**
+     * Constructs a new LoggableDispatcherServlet with specified logging configurations.
+     *
+     * @param maxFileSize         the maximum size of the log file in megabytes.
+     * @param maxStringSize       the maximum size of the request/response body to be logged in megabytes.
+     * @param logFilePath         the directory path where log files will be stored.
+     * @param charset             the character encoding to be used for logging.
+     * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
+     */
     public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath,
                                      String charset, Integer maxCacheHistoryLogs) {
         this.maxFileSizeMb = maxFileSize * 1024 * 1024; // Convert MB to bytes
@@ -41,6 +57,9 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         setupLogger();
     }
 
+    /**
+     * Sets up the logger with a FileHandler for logging to a file.
+     */
     private void setupLogger() {
         try {
             // Ensure logs directory exists
@@ -57,7 +76,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             // Create FileHandler with size limit and rotating file pattern
             FileHandler fileHandler = new FileHandler(logFile.toString(), maxFileSizeMb, 1, true);
             fileHandler.setFormatter(new CustomLogFormatter());
-            fileHandler.setEncoding(Charset.forName(charset, StandardCharsets.UTF_8).toString());
+            fileHandler.setEncoding(Charset.forName(charset).toString());
 
             // Add the FileHandler to the logger.
             LOGGER.addHandler(fileHandler);
@@ -68,9 +87,14 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Dispatches the request and response, and logs the request and response payloads.
+     *
+     * @param request  the HTTP request.
+     * @param response the HTTP response.
+     */
     @Override
-    protected void doDispatch(@NotNull HttpServletRequest request, @NotNull
-    HttpServletResponse response) {
+    protected void doDispatch(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -87,6 +111,14 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Logs the HTTP request and response details.
+     *
+     * @param requestToCache  the HTTP request to be logged.
+     * @param responseToCache the HTTP response to be logged.
+     * @param handler         the handler for the request.
+     * @throws IOException if an input or output exception occurs.
+     */
     private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler)
             throws IOException {
 
@@ -106,12 +138,19 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         getResponsePayload(responseToCache, log);
 
         // Delete first element if the list is overflown
-        if (PayloadHistory.viewLogs().size() > maxCacheHistoryLogs)
+        if (PayloadHistory.viewLogs().size() > maxCacheHistoryLogs) {
             PayloadHistory.viewLogs().removeFirst();
+        }
 
         PayloadHistory.addLog(log);
     }
 
+    /**
+     * Retrieves and logs the request payload.
+     *
+     * @param request the HTTP request.
+     * @param log     the payload log object.
+     */
     private void getRequestPayload(HttpServletRequest request, Payload log) {
         ContentCachingRequestWrapper wrapper = WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
         if (wrapper != null) {
@@ -120,6 +159,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Retrieves and logs the response payload.
+     *
+     * @param response the HTTP response.
+     * @param log      the payload log object.
+     * @throws IOException if an input or output exception occurs.
+     */
     private void getResponsePayload(HttpServletResponse response, Payload log) throws IOException {
         updateResponse(response);
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
@@ -129,6 +175,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Logs the request or response payload if within size limits.
+     *
+     * @param byteArray         the payload byte array.
+     * @param isPayloadResponse indicates if the payload is a response.
+     * @param log               the payload log object.
+     */
     private void printWrapper(byte[] byteArray, Boolean isPayloadResponse, Payload log) {
         if (byteArray.length > 0 && byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
@@ -145,13 +198,25 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Updates the response by copying the body to the response.
+     *
+     * @param response the HTTP response.
+     * @throws IOException if an input or output exception occurs.
+     */
     private void updateResponse(HttpServletResponse response) throws IOException {
-        ContentCachingResponseWrapper responseWrapper =
-                WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
+        ContentCachingResponseWrapper responseWrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         assert responseWrapper != null;
         responseWrapper.copyBodyToResponse();
     }
 
+    /**
+     * Determines whether the request should be logged.
+     *
+     * @param request the HTTP request.
+     * @return true if the request should be logged; false otherwise.
+     * @throws Exception if an error occurs while determining if the request should be logged.
+     */
     private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
         HandlerExecutionChain handler = getHandler(request);
         if (handler != null && handler.getHandler() instanceof HandlerMethod handlerMethod) {
@@ -164,6 +229,14 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         return false;
     }
 
+    /**
+     * Executes the dispatching of the request and logs the details.
+     *
+     * @param request  the HTTP request.
+     * @param response the HTTP response.
+     * @param handler  the handler for the request.
+     * @throws Exception if an error occurs while dispatching the request.
+     */
     private void executeLogDispatch(HttpServletRequest request, HttpServletResponse response,
                                     @NotNull HandlerExecutionChain handler) throws Exception {
         try {
@@ -177,5 +250,4 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             }
         }
     }
-
 }
