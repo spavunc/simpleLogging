@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PayloadHistory {
-    private static List<Payload> payloadHistory = new ArrayList<>();
+    private static final List<Payload> payloadHistory = new ArrayList<>();
 
     public static synchronized void addLog(Payload log) {
         payloadHistory.add(log);

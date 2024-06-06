@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Payload {
-    public String httpMethod;
-    public String requestUrl;
-    public String requestHandler;
-    public Integer httpStatus;
-    public String requestBody;
-    public String responseBody;
+    private String httpMethod;
+    private String requestUrl;
+    private String requestHandler;
+    private Integer httpStatus;
+    private String requestBody;
+    private String responseBody;
 }

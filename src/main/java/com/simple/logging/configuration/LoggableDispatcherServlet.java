@@ -135,7 +135,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             LOGGER.info(jsonStringFromByteArray);
 
             // Check whether the payload is a response or a request
-            if (isPayloadResponse) {
+            if (Boolean.TRUE.equals(isPayloadResponse)) {
                 log.setResponseBody(jsonStringFromByteArray);
             } else {
                 log.setRequestBody(jsonStringFromByteArray);
