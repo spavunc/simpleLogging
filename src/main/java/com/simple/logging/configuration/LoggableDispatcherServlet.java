@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -127,6 +128,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .requestUrl(requestToCache.getRequestURL().toString())
                 .httpStatus(responseToCache.getStatus())
                 .requestHandler(handler.getHandler().toString())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         LOGGER.info(() -> "HTTP METHOD - " + log.getHttpMethod());
