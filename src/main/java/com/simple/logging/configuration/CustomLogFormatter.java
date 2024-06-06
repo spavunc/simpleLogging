@@ -7,16 +7,16 @@ import java.util.logging.LogRecord;
 
 public class CustomLogFormatter extends Formatter {
 
-  private static final DateTimeFormatter
-    dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter
+            dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-  @Override
-  public String format(LogRecord logRecord) {
-    return dateTimeFormatter.format(LocalDateTime.now()) +
-      " " +
-      logRecord.getLevel().getName() +
-      ": " +
-      formatMessage(logRecord) +
-      System.lineSeparator();
-  }
+    @Override
+    public String format(LogRecord logRecord) {
+        return dateTimeFormatter.format(LocalDateTime.now()) +
+                " " +
+                logRecord.getLevel().getName() +
+                ": " +
+                formatMessage(logRecord) +
+                System.lineSeparator();
+    }
 }
