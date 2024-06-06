@@ -33,7 +33,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${maxStringSize}") Integer maxStringSize,
                                       @Value("${logFilePath}") String logFilePath,
                                       @Value("${charset}") String charset,
-                                      @Value("100") Integer maxCacheHistoryLogs) {
+                                      @Value("${maxCacheHistoryLogs}") Integer maxCacheHistoryLogs) {
         this.maxFileSize = maxFileSize;
         this.maxStringSize = maxStringSize;
         this.logFilePath = logFilePath;
