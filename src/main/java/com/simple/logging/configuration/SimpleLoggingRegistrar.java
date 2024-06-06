@@ -27,12 +27,14 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         Integer maxStringSize = attributes.getNumber("maxStringSize");
         String logFilePath = attributes.getString("logFilePath");
         String charset = attributes.getString("charset");
+        String maxCacheHistoryLogs = attributes.getString("maxCacheHistoryLogs");
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SimpleLoggingConfiguration.class);
         builder.addConstructorArgValue(maxFileSize);
         builder.addConstructorArgValue(maxStringSize);
         builder.addConstructorArgValue(logFilePath);
         builder.addConstructorArgValue(charset);
+        builder.addConstructorArgValue(maxCacheHistoryLogs);
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }
