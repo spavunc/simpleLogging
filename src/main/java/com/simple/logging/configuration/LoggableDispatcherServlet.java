@@ -185,10 +185,12 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param log               the payload log object.
      */
     private void printWrapper(byte[] byteArray, boolean isPayloadResponse, Payload log) {
-        if (byteArray.length > 0 && byteArray.length < maxStringSizeMb) {
+        if (byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
-            LOGGER.info(jsonStringFromByteArray);
-
+            String payloadMarker = isPayloadResponse ? "RESPONSE BODY: {0}" : "REQUEST BODY: {0}";
+            if (!jsonStringFromByteArray.isBlank()) {
+              LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
+            }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {
                 log.setResponseBody(jsonStringFromByteArray);
