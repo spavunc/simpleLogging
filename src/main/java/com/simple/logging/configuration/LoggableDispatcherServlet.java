@@ -108,7 +108,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             assert handler != null;
             executeLogDispatch(request, response, handler);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred - {0}", ex.getMessage());
+            LOGGER.log(Level.SEVERE, String.format("Exception occurred - %s", ex.getMessage()), ex);
         }
     }
 
@@ -246,8 +246,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         try {
             super.doDispatch(request, response);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Exception occurred - {0}", ex.getMessage());
-            throw ex; // rethrow the exception after logging
+            LOGGER.log(Level.SEVERE, String.format("Exception occurred - %s", ex.getMessage()), ex);
         } finally {
             if (shouldLogRequest(request)) {
                 log(request, response, handler);

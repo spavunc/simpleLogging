@@ -1,5 +1,7 @@
 package com.simple.logging.configuration;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Formatter;
@@ -26,11 +28,21 @@ public class CustomLogFormatter extends Formatter {
      */
     @Override
     public String format(LogRecord logRecord) {
+      String throwable = "";
+      if (logRecord.getThrown() != null) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        pw.println();
+        logRecord.getThrown().printStackTrace(pw);
+        pw.close();
+        throwable = sw.toString();
+      }
         return dateTimeFormatter.format(LocalDateTime.now()) +
                 " " +
                 logRecord.getLevel().getName() +
                 ": " +
                 formatMessage(logRecord) +
+                throwable +
                 System.lineSeparator();
     }
 }
