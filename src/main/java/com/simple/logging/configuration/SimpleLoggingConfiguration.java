@@ -74,8 +74,13 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                 charset, maxCacheHistoryLogs, applicationName);
     }
 
+    /**
+     * Creates and configures a new instance of DynamicLogRetentionScheduler.
+     *
+     * @return the configured DynamicLogRetentionScheduler instance.
+     */
     @Bean
-    public DynamicLogRetentionScheduler getDynamicLogRetentionScheduler() {
+    public DynamicLogRetentionScheduler dynamicLogRetentionScheduler() {
         return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler, logFilePath, applicationName);
     }
 }
