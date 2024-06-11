@@ -38,8 +38,6 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private final String logFilePath;
     private final String charset;
     private final Integer maxCacheHistoryLogs;
-    private final Integer logRetentionLengthInDays;
-    private final String logDeletionCronScheduler;
     private final String applicationName;
 
     /**
@@ -50,19 +48,15 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param logFilePath              the directory path where log files will be stored.
      * @param charset                  the character encoding to be used for logging.
      * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
-     * @param logRetentionLengthInDays length in days how long are the log files kept before deletion.
-     * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      * @param applicationName          name of your application.
      */
     public LoggableDispatcherServlet(int maxFileSizeMb, int maxStringSizeMb, String logFilePath,
-                                     String charset, Integer maxCacheHistoryLogs, Integer logRetentionLengthInDays, String logDeletionCronScheduler, String applicationName) {
+                                     String charset, Integer maxCacheHistoryLogs, String applicationName) {
         this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
         this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
-        this.logRetentionLengthInDays = logRetentionLengthInDays;
-        this.logDeletionCronScheduler = logDeletionCronScheduler;
         this.applicationName = applicationName;
         setupLogger();
     }

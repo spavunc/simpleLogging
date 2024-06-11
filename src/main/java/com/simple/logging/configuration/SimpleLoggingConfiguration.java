@@ -1,11 +1,9 @@
 package com.simple.logging.configuration;
 
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -14,8 +12,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * with configurable parameters for logging file size, string size, file path, charset, and cache history logs.
  */
 @Configuration
-@EnableScheduling
-@Data
 public class SimpleLoggingConfiguration implements WebMvcConfigurer {
 
     private final Integer maxFileSizeMb;
@@ -75,6 +71,11 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean(name = "loggingDispatcherServlet")
     public DispatcherServlet dispatcherServlet() {
         return new LoggableDispatcherServlet(maxFileSizeMb, maxStringSizeMb, logFilePath,
-                charset, maxCacheHistoryLogs, logRetentionLengthInDays, logDeletionCronScheduler, applicationName);
+                charset, maxCacheHistoryLogs, applicationName);
+    }
+
+    @Bean
+    public DynamicLogRetentionScheduler getDynamicLogRetentionScheduler() {
+        return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler, logFilePath, applicationName);
     }
 }

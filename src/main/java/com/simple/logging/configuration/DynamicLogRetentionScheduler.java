@@ -2,10 +2,8 @@ package com.simple.logging.configuration;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -14,25 +12,24 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 /**
- * Configuration class that handles dynamic scheduling of log file deletion based on a retention policy.
+ * Utility class that handles dynamic scheduling of log file deletion based on a retention policy.
  */
-@Component
 @Slf4j
 public class DynamicLogRetentionScheduler {
-    private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+    private final Integer logRetentionLengthInDays;
+    private final String logDeletionCronScheduler;
+    private final String logFilePath;
+    private final String applicationName;
 
-    @Value("${logDeletionCronScheduler:0 0 0 * * ?}")
-    private String logDeletionCronScheduler;
-
-    @Value("${logRetentionLengthInDays:5}")
-    private Integer logRetentionLengthInDays;
-
-    @Value("${applicationName:application}")
-    private String applicationName;
-
-    @Value("${logFilePath:logs}")
-    private String logFilePath;
+    public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFIlePath,
+                                        String applicationName) {
+        this.logRetentionLengthInDays = logRetentionLengthInDays;
+        this.logDeletionCronScheduler = logDeletionCronScheduler;
+        this.logFilePath = logFIlePath;
+        this.applicationName = applicationName;
+    }
 
     /**
      * Initializes the task scheduler and schedules the log deletion task according to the configured cron schedule.

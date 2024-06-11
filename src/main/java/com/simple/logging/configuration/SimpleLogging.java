@@ -1,6 +1,5 @@
 package com.simple.logging.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
