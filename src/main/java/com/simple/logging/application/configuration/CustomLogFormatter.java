@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.configuration;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

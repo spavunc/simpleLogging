@@ -1,5 +1,6 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.annotation;
 
+import com.simple.logging.application.configuration.SimpleLoggingRegistrar;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;

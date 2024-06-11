@@ -1,5 +1,7 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.configuration;
 
+import com.simple.logging.application.servlet.LoggableDispatcherServlet;
+import com.simple.logging.scheduler.DynamicLogRetentionScheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;

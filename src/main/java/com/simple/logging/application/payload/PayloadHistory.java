@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.payload;
 
 import java.util.ArrayList;
 import java.util.List;

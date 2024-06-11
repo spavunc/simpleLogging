@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

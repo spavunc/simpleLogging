@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

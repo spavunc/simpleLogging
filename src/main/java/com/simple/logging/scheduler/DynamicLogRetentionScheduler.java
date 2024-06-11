@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.scheduler;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;

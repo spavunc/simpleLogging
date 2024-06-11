@@ -1,5 +1,6 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.configuration;
 
+import com.simple.logging.application.annotation.SimpleLogging;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
