@@ -25,6 +25,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final String logDeletionCronScheduler;
     private final String applicationName;
     private final boolean compressOldLogs;
+    private final boolean deleteCompressedLogs;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -38,6 +39,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      * @param applicationName          name of your application.
      * @param compressOldLogs          compress old logs into a ZIP archive.
+     * @param deleteCompressedLogs     delete compressed logs on scheduler.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb:50}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb:5}") Integer maxStringSizeMb,
@@ -47,7 +49,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${logRetentionLengthInDays:5}") Integer logRetentionLengthInDays,
                                       @Value("${logDeletionCronScheduler:0 0 0 * * ?}") String logDeletionCronScheduler,
                                       @Value("${applicationName:application}") String applicationName,
-                                      @Value("${compressOldLogs:true}") boolean compressOldLogs) {
+                                      @Value("${compressOldLogs:true}") boolean compressOldLogs,
+                                      @Value("${deleteCompressedLogs:true}") boolean deleteCompressedLogs) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
@@ -57,6 +60,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.logDeletionCronScheduler = logDeletionCronScheduler;
         this.applicationName = applicationName;
         this.compressOldLogs = compressOldLogs;
+        this.deleteCompressedLogs = deleteCompressedLogs;
     }
 
     /**
@@ -88,6 +92,6 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean
     public DynamicLogRetentionScheduler dynamicLogRetentionScheduler() {
         return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler,
-                logFilePath, applicationName, compressOldLogs);
+                logFilePath, applicationName, compressOldLogs, deleteCompressedLogs);
     }
 }

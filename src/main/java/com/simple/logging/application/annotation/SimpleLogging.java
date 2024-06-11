@@ -29,4 +29,6 @@ public @interface SimpleLogging {
     String applicationName() default "application";
 
     boolean compressOldLogs() default true;
+
+    boolean deleteCompressedLogs() default true;
 }
