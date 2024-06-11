@@ -45,19 +45,19 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
      *
-     * @param maxFileSize              the maximum size of the log file in megabytes.
-     * @param maxStringSize            the maximum size of the request/response body to be logged in megabytes.
+     * @param maxFileSizeMb            the maximum size of the log file in megabytes.
+     * @param maxStringSizeMb          the maximum size of the request/response body to be logged in megabytes.
      * @param logFilePath              the directory path where log files will be stored.
      * @param charset                  the character encoding to be used for logging.
      * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
-     * @param logRetentionLengthInDays    length in days how long are the log files kept before deletion.
+     * @param logRetentionLengthInDays length in days how long are the log files kept before deletion.
      * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      * @param applicationName          name of your application.
      */
-    public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath,
+    public LoggableDispatcherServlet(int maxFileSizeMb, int maxStringSizeMb, String logFilePath,
                                      String charset, Integer maxCacheHistoryLogs, Integer logRetentionLengthInDays, String logDeletionCronScheduler, String applicationName) {
-        this.maxFileSizeMb = maxFileSize * 1024 * 1024; // Convert MB to bytes
-        this.maxStringSizeMb = maxStringSize * 1024 * 1024;
+        this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
+        this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;

@@ -12,9 +12,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Import(SimpleLoggingRegistrar.class)
 public @interface SimpleLogging {
-    int maxFileSize() default 50;
+    int maxFileSizeMb() default 50;
 
-    int maxStringSize() default 5;
+    int maxStringSizeMb() default 5;
 
     String logFilePath() default "logs";
 
