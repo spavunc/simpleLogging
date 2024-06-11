@@ -19,4 +19,5 @@ public class Payload {
     private String requestBody;
     private String responseBody;
     private LocalDateTime timestamp;
+    private String uuid;
 }

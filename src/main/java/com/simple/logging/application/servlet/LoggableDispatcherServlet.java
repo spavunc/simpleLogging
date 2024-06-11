@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -130,14 +131,18 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler)
             throws IOException {
 
+        String uuid = UUID.randomUUID().toString();
+
         Payload log = Payload.builder()
                 .httpMethod(requestToCache.getMethod())
                 .requestUrl(requestToCache.getRequestURL().toString())
                 .httpStatus(responseToCache.getStatus())
                 .requestHandler(handler.getHandler().toString())
                 .timestamp(LocalDateTime.now())
+                .uuid(uuid)
                 .build();
 
+        LOGGER.info("LOG UUID - " + uuid);
         LOGGER.info(() -> "HTTP METHOD - " + log.getHttpMethod());
         LOGGER.info("REQUEST URL - " + log.getRequestUrl());
         LOGGER.info(() -> "REQUEST HANDLER - " + log.getRequestHandler());
