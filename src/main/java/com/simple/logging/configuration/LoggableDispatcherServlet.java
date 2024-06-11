@@ -50,7 +50,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
      * @param applicationName          name of your application.
      */
-    public LoggableDispatcherServlet(int maxFileSizeMb, int maxStringSizeMb, String logFilePath,
+    public LoggableDispatcherServlet(Integer maxFileSizeMb, Integer maxStringSizeMb, String logFilePath,
                                      String charset, Integer maxCacheHistoryLogs, String applicationName) {
         this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
         this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;

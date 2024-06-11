@@ -81,6 +81,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      */
     @Bean
     public DynamicLogRetentionScheduler dynamicLogRetentionScheduler() {
-        return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler, logFilePath, applicationName);
+        return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler,
+                logFilePath, applicationName);
     }
 }

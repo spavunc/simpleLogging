@@ -23,24 +23,15 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
     public void registerBeanDefinitions(@NotNull AnnotationMetadata importingClassMetadata, @NotNull BeanDefinitionRegistry registry) {
         AnnotationAttributes attributes = AnnotationAttributes.fromMap(importingClassMetadata.getAnnotationAttributes(SimpleLogging.class.getName()));
         assert attributes != null;
-        Integer maxFileSizeMb = attributes.getNumber("maxFileSizeMb");
-        Integer maxStringSizeMb = attributes.getNumber("maxStringSizeMb");
-        String logFilePath = attributes.getString("logFilePath");
-        String charset = attributes.getString("charset");
-        Integer maxCacheHistoryLogs = attributes.getNumber("maxCacheHistoryLogs");
-        Integer logRetentionLengthInDays = attributes.getNumber("logRetentionLengthInDays");
-        String logDeletionCronScheduler = attributes.getString("logDeletionCronScheduler");
-        String applicationName = attributes.getString("applicationName");
-
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SimpleLoggingConfiguration.class);
-        builder.addConstructorArgValue(maxFileSizeMb);
-        builder.addConstructorArgValue(maxStringSizeMb);
-        builder.addConstructorArgValue(logFilePath);
-        builder.addConstructorArgValue(charset);
-        builder.addConstructorArgValue(maxCacheHistoryLogs);
-        builder.addConstructorArgValue(logRetentionLengthInDays);
-        builder.addConstructorArgValue(logDeletionCronScheduler);
-        builder.addConstructorArgValue(applicationName);
+        builder.addConstructorArgValue(attributes.getNumber("maxFileSizeMb"));
+        builder.addConstructorArgValue(attributes.getNumber("maxStringSizeMb"));
+        builder.addConstructorArgValue(attributes.getString("logFilePath"));
+        builder.addConstructorArgValue(attributes.getString("charset"));
+        builder.addConstructorArgValue(attributes.getNumber("maxCacheHistoryLogs"));
+        builder.addConstructorArgValue(attributes.getNumber("logRetentionLengthInDays"));
+        builder.addConstructorArgValue(attributes.getString("logDeletionCronScheduler"));
+        builder.addConstructorArgValue(attributes.getString("applicationName"));
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }
