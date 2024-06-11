@@ -27,11 +27,13 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
      *
-     * @param maxFileSize         the maximum size of the log file in megabytes.
-     * @param maxStringSize       the maximum size of the request/response body to be logged in megabytes.
-     * @param logFilePath         the directory path where log files will be stored.
-     * @param charset             the character encoding to be used for logging.
-     * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
+     * @param maxFileSize              the maximum size of the log file in megabytes.
+     * @param maxStringSize            the maximum size of the request/response body to be logged in megabytes.
+     * @param logFilePath              the directory path where log files will be stored.
+     * @param charset                  the character encoding to be used for logging.
+     * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
+     * @param retentionLengthInDays    length in days how long are the log files kept before deletion.
+     * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSize}") Integer maxFileSize,
                                       @Value("${maxStringSize}") Integer maxStringSize,

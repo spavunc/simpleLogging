@@ -1,5 +1,8 @@
 package com.simple.logging.configuration;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -7,9 +10,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -44,11 +44,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
      *
-     * @param maxFileSize         the maximum size of the log file in megabytes.
-     * @param maxStringSize       the maximum size of the request/response body to be logged in megabytes.
-     * @param logFilePath         the directory path where log files will be stored.
-     * @param charset             the character encoding to be used for logging.
-     * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
+     * @param maxFileSize              the maximum size of the log file in megabytes.
+     * @param maxStringSize            the maximum size of the request/response body to be logged in megabytes.
+     * @param logFilePath              the directory path where log files will be stored.
+     * @param charset                  the character encoding to be used for logging.
+     * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
+     * @param retentionLengthInDays    length in days how long are the log files kept before deletion.
+     * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      */
     public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath,
                                      String charset, Integer maxCacheHistoryLogs, Integer retentionLengthInDays, String logDeletionCronScheduler) {
