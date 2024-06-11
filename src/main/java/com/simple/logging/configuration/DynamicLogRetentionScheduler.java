@@ -2,9 +2,7 @@ package com.simple.logging.configuration;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
@@ -20,21 +18,21 @@ import java.time.temporal.ChronoUnit;
  */
 @Component
 @Slf4j
-public class DynamicLogRetentionScheduler implements EnvironmentAware {
+public class DynamicLogRetentionScheduler {
     private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
-    private Environment environment;
+    @Value("${logDeletionCronScheduler:0 0 0 * * ?}")
+    private String logDeletionCronScheduler;
 
-    @Autowired
-    public DynamicLogRetentionScheduler(Environment environment) {
-        this.environment = environment;
-    }
+    @Value("${logRetentionLengthInDays:5}")
+    private Integer logRetentionLengthInDays;
 
-    @Override
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
-    }
+    @Value("${applicationName:application}")
+    private String applicationName;
+
+    @Value("${logFilePath:logs}")
+    private String logFilePath;
 
     /**
      * Initializes the task scheduler and schedules the log deletion task according to the configured cron schedule.
@@ -42,10 +40,18 @@ public class DynamicLogRetentionScheduler implements EnvironmentAware {
     @PostConstruct
     public void scheduleLogDeletion() {
         log.info("Initializing Task Scheduler...");
-        String logDeletionCronScheduler = environment.getProperty("logDeletionCronScheduler", String.class);
+        if (logDeletionCronScheduler == null || logDeletionCronScheduler.isBlank()) {
+            log.error("Cron expression for log deletion is empty or not set. Log deletion will not be scheduled.");
+            return;
+        }
+
         taskScheduler.initialize();
         log.info("Scheduling log deletion with cron expression: {}", logDeletionCronScheduler);
-        taskScheduler.schedule(this::applyLogRetentionPolicy, new CronTrigger(logDeletionCronScheduler));
+        try {
+            taskScheduler.schedule(this::applyLogRetentionPolicy, new CronTrigger(logDeletionCronScheduler));
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid cron expression for log deletion: {}", logDeletionCronScheduler, e);
+        }
     }
 
     /**
@@ -53,10 +59,6 @@ public class DynamicLogRetentionScheduler implements EnvironmentAware {
      */
     public void applyLogRetentionPolicy() {
         log.info("Initiating deletion of old log files...");
-
-        Integer logRetentionLengthInDays = environment.getProperty("logRetentionLengthInDays", Integer.class);
-        String applicationName = environment.getProperty("applicationName", String.class);
-        String logFilePath = environment.getProperty("logFilePath", String.class);
 
         File logDir = new File(logFilePath);
         if (!logDir.exists() || !logDir.isDirectory()) {
