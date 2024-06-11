@@ -1,5 +1,6 @@
 package com.simple.logging.configuration;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.ElementType;
@@ -20,4 +21,8 @@ public @interface SimpleLogging {
     String charset() default "UTF-8";
 
     int maxCacheHistoryLogs() default 100;
+
+    int retentionLengthInDays() default 5;
+
+    String logDeletionCronScheduler() default "0 0 0 * * ?";
 }

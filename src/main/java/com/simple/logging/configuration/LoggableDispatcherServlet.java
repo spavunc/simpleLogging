@@ -1,8 +1,5 @@
 package com.simple.logging.configuration;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -10,6 +7,9 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +38,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private final String logFilePath;
     private final String charset;
     private final Integer maxCacheHistoryLogs;
+    private final Integer retentionLengthInDays;
+    private final String logDeletionCronScheduler;
 
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
@@ -49,12 +51,14 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
      */
     public LoggableDispatcherServlet(int maxFileSize, int maxStringSize, String logFilePath,
-                                     String charset, Integer maxCacheHistoryLogs) {
+                                     String charset, Integer maxCacheHistoryLogs, Integer retentionLengthInDays, String logDeletionCronScheduler) {
         this.maxFileSizeMb = maxFileSize * 1024 * 1024; // Convert MB to bytes
         this.maxStringSizeMb = maxStringSize * 1024 * 1024;
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
+        this.retentionLengthInDays = retentionLengthInDays;
+        this.logDeletionCronScheduler = logDeletionCronScheduler;
         setupLogger();
     }
 
@@ -141,7 +145,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
 
         // Delete first element if the list is overflown
         if (PayloadHistory.viewLogs().size() >= maxCacheHistoryLogs) {
-            PayloadHistory.viewLogs().removeFirst();
+            PayloadHistory.viewLogs().remove(0);
         }
 
         PayloadHistory.addLog(log);
@@ -189,7 +193,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
             String payloadMarker = isPayloadResponse ? "RESPONSE BODY: {0}" : "REQUEST BODY: {0}";
             if (!jsonStringFromByteArray.isBlank()) {
-              LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
+                LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {

@@ -1,6 +1,6 @@
 package com.simple.logging.configuration;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
@@ -28,6 +28,8 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         String logFilePath = attributes.getString("logFilePath");
         String charset = attributes.getString("charset");
         Integer maxCacheHistoryLogs = attributes.getNumber("maxCacheHistoryLogs");
+        Integer retentionLengthInDays = attributes.getNumber("retentionLengthInDays");
+        String logDeletionCronScheduler = attributes.getString("logDeletionCronScheduler");
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SimpleLoggingConfiguration.class);
         builder.addConstructorArgValue(maxFileSize);
@@ -35,6 +37,8 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(logFilePath);
         builder.addConstructorArgValue(charset);
         builder.addConstructorArgValue(maxCacheHistoryLogs);
+        builder.addConstructorArgValue(retentionLengthInDays);
+        builder.addConstructorArgValue(logDeletionCronScheduler);
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }
