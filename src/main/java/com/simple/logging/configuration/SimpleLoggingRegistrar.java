@@ -28,8 +28,9 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         String logFilePath = attributes.getString("logFilePath");
         String charset = attributes.getString("charset");
         Integer maxCacheHistoryLogs = attributes.getNumber("maxCacheHistoryLogs");
-        Integer retentionLengthInDays = attributes.getNumber("retentionLengthInDays");
+        Integer logRetentionLengthInDays = attributes.getNumber("logRetentionLengthInDays");
         String logDeletionCronScheduler = attributes.getString("logDeletionCronScheduler");
+        String applicationName = attributes.getString("applicationName");
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SimpleLoggingConfiguration.class);
         builder.addConstructorArgValue(maxFileSize);
@@ -37,8 +38,9 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(logFilePath);
         builder.addConstructorArgValue(charset);
         builder.addConstructorArgValue(maxCacheHistoryLogs);
-        builder.addConstructorArgValue(retentionLengthInDays);
+        builder.addConstructorArgValue(logRetentionLengthInDays);
         builder.addConstructorArgValue(logDeletionCronScheduler);
+        builder.addConstructorArgValue(applicationName);
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }

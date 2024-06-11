@@ -20,14 +20,17 @@ import java.time.temporal.ChronoUnit;
 @EnableScheduling
 public class DynamicLogRetentionScheduler {
 
-    @Value("${retentionLengthInDays}")
-    private Integer retentionLengthInDays;
+    @Value("${logRetentionLengthInDays}")
+    private Integer logRetentionLengthInDays;
 
     @Value("${logDeletionCronScheduler}")
     private String logDeletionCronScheduler;
 
     @Value("${logFilePath}")
     private String logFilePath;
+
+    @Value("${applicationName}")
+    private String applicationName;
 
     private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
@@ -51,7 +54,7 @@ public class DynamicLogRetentionScheduler {
             return;
         }
 
-        File[] logFiles = logDir.listFiles((dir, name) -> name.matches("application-\\d{4}-\\d{2}-\\d{2}.*"));
+        File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
         if (logFiles == null) {
             return;
         }
@@ -62,7 +65,7 @@ public class DynamicLogRetentionScheduler {
             LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
             long daysBetween = ChronoUnit.DAYS.between(fileDate, today);
 
-            if (daysBetween > retentionLengthInDays) {
+            if (daysBetween > logRetentionLengthInDays) {
                 try {
                     Files.delete(logFile.toPath());
                     System.out.println("Deleted log file: " + logFile.getName());

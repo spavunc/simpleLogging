@@ -21,8 +21,9 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final String logFilePath;
     private final String charset;
     private final Integer maxCacheHistoryLogs;
-    private final Integer retentionLengthInDays;
+    private final Integer logRetentionLengthInDays;
     private final String logDeletionCronScheduler;
+    private final String applicationName;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -32,23 +33,26 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param logFilePath              the directory path where log files will be stored.
      * @param charset                  the character encoding to be used for logging.
      * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
-     * @param retentionLengthInDays    length in days how long are the log files kept before deletion.
+     * @param logRetentionLengthInDays    length in days how long are the log files kept before deletion.
      * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
+     * @param applicationName          name of your application.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSize}") Integer maxFileSize,
                                       @Value("${maxStringSize}") Integer maxStringSize,
                                       @Value("${logFilePath}") String logFilePath,
                                       @Value("${charset}") String charset,
                                       @Value("${maxCacheHistoryLogs}") Integer maxCacheHistoryLogs,
-                                      @Value("5") Integer retentionLengthInDays,
-                                      @Value("0 0 0 * * ?") String logDeletionCronScheduler) {
+                                      @Value("5") Integer logRetentionLengthInDays,
+                                      @Value("0 0 0 * * ?") String logDeletionCronScheduler,
+                                      @Value("application") String applicationName) {
         this.maxFileSize = maxFileSize;
         this.maxStringSize = maxStringSize;
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
-        this.retentionLengthInDays = retentionLengthInDays;
+        this.logRetentionLengthInDays = logRetentionLengthInDays;
         this.logDeletionCronScheduler = logDeletionCronScheduler;
+        this.applicationName = applicationName;
     }
 
     /**
@@ -68,6 +72,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      */
     @Bean(name = "loggingDispatcherServlet")
     public DispatcherServlet dispatcherServlet() {
-        return new LoggableDispatcherServlet(maxFileSize, maxStringSize, logFilePath, charset, maxCacheHistoryLogs, retentionLengthInDays, logDeletionCronScheduler);
+        return new LoggableDispatcherServlet(maxFileSize, maxStringSize, logFilePath,
+                charset, maxCacheHistoryLogs, logRetentionLengthInDays, logDeletionCronScheduler, applicationName);
     }
 }
