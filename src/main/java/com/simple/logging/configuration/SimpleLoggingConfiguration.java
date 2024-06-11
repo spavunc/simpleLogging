@@ -39,14 +39,14 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
      * @param applicationName          name of your application.
      */
-    public SimpleLoggingConfiguration(@Value("${maxFileSizeMb}") Integer maxFileSizeMb,
-                                      @Value("${maxStringSizeMb}") Integer maxStringSizeMb,
-                                      @Value("${logFilePath}") String logFilePath,
-                                      @Value("${charset}") String charset,
-                                      @Value("${maxCacheHistoryLogs}") Integer maxCacheHistoryLogs,
-                                      @Value("${logRetentionLengthInDays}") Integer logRetentionLengthInDays,
-                                      @Value("${logDeletionCronScheduler}") String logDeletionCronScheduler,
-                                      @Value("${applicationName}") String applicationName) {
+    public SimpleLoggingConfiguration(@Value("${maxFileSizeMb:50}") Integer maxFileSizeMb,
+                                      @Value("${maxStringSizeMb:5}") Integer maxStringSizeMb,
+                                      @Value("${logFilePath:logs}") String logFilePath,
+                                      @Value("${charset:UTF-8}") String charset,
+                                      @Value("${maxCacheHistoryLogs:100}") Integer maxCacheHistoryLogs,
+                                      @Value("${logRetentionLengthInDays:5}") Integer logRetentionLengthInDays,
+                                      @Value("${logDeletionCronScheduler:0 0 0 * * ?}") String logDeletionCronScheduler,
+                                      @Value("${applicationName:application}") String applicationName) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
