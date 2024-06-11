@@ -2,10 +2,10 @@ package com.simple.logging.configuration;
 
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -16,7 +16,7 @@ import java.time.temporal.ChronoUnit;
 /**
  * Configuration class that handles dynamic scheduling of log file deletion based on a retention policy.
  */
-@Configuration
+@Component
 @EnableScheduling
 public class DynamicLogRetentionScheduler {
 
