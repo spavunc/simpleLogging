@@ -158,7 +158,7 @@ public class DynamicLogRetentionScheduler {
 
             zos.closeEntry();
 
-            log.info("Compressing of {} complete.", logFile.getName());
+            log.info("Compression of {} complete.", logFile.getName());
         }
 
         return true;
