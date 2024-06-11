@@ -6,10 +6,15 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Utility class that handles dynamic scheduling of log file deletion based on a retention policy.
@@ -22,13 +27,15 @@ public class DynamicLogRetentionScheduler {
     private final String logDeletionCronScheduler;
     private final String logFilePath;
     private final String applicationName;
+    private final boolean compressOldLogs;
 
     public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFIlePath,
-                                        String applicationName) {
+                                        String applicationName, boolean compressOldLogs) {
         this.logRetentionLengthInDays = logRetentionLengthInDays;
         this.logDeletionCronScheduler = logDeletionCronScheduler;
         this.logFilePath = logFIlePath;
         this.applicationName = applicationName;
+        this.compressOldLogs = compressOldLogs;
     }
 
     /**
@@ -45,7 +52,13 @@ public class DynamicLogRetentionScheduler {
         taskScheduler.initialize();
         log.info("Scheduling log deletion with cron expression: {}", logDeletionCronScheduler);
         try {
-            taskScheduler.schedule(this::applyLogRetentionPolicy, new CronTrigger(logDeletionCronScheduler));
+            taskScheduler.schedule(() -> {
+                try {
+                    applyLogRetentionPolicy();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }, new CronTrigger(logDeletionCronScheduler));
         } catch (IllegalArgumentException e) {
             log.error("Invalid cron expression for log deletion: {}", logDeletionCronScheduler, e);
         }
@@ -54,7 +67,7 @@ public class DynamicLogRetentionScheduler {
     /**
      * Applies the log retention policy by deleting log files that are older than the configured retention length.
      */
-    public void applyLogRetentionPolicy() {
+    public void applyLogRetentionPolicy() throws IOException {
         log.info("Initiating deletion of old log files...");
 
         File logDir = new File(logFilePath);
@@ -76,6 +89,17 @@ public class DynamicLogRetentionScheduler {
             LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
             long daysBetween = ChronoUnit.DAYS.between(fileDate, today);
 
+            // Compress old logs into a ZIP archive, if compressLogFile returns true,
+            // it means the ZIP has been created and original file can be deleted
+            if (daysBetween >= 1 && compressOldLogs) {
+                if (compressLogFile(logFile)) {
+                    Files.delete(logFile.toPath());
+                    log.info("Deleted log file: " + logFile.getName());
+                    continue;
+                }
+            }
+
+            // Delete old logs, zipped and unzipped
             if (daysBetween > logRetentionLengthInDays) {
                 try {
                     Files.delete(logFile.toPath());
@@ -88,5 +112,43 @@ public class DynamicLogRetentionScheduler {
         }
 
         log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
+    }
+
+    /**
+     * Compresses a given log file into a ZIP archive.
+     * <p>
+     * This method reads the specified log file and writes it into a ZIP file
+     * with the same name but with a ".zip" extension. The original log file is
+     * not deleted within this method but can be deleted after calling this method if desired.
+     * <p>
+     *
+     * @param logFile the log file to be compressed
+     * @throws IOException if an I/O error occurs during the compression process
+     */
+    private boolean compressLogFile(File logFile) throws IOException {
+        if (logFile.getName().endsWith(".zip"))
+            return false;
+
+        log.info("Compressing {}...", logFile.getName());
+        String zipFileName = logFile.getAbsolutePath() + ".zip";
+        try (FileOutputStream fos = new FileOutputStream(zipFileName);
+             ZipOutputStream zos = new ZipOutputStream(fos);
+             FileInputStream fis = new FileInputStream(logFile)) {
+
+            ZipEntry zipEntry = new ZipEntry(logFile.getName());
+            zos.putNextEntry(zipEntry);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) > 0) {
+                zos.write(buffer, 0, length);
+            }
+
+            zos.closeEntry();
+
+            log.info("Compressing of {} complete.", logFile.getName());
+        }
+
+        return true;
     }
 }

@@ -27,4 +27,6 @@ public @interface SimpleLogging {
     String logDeletionCronScheduler() default "0 0 0 * * ?";
 
     String applicationName() default "application";
+
+    boolean compressOldLogs() default true;
 }
