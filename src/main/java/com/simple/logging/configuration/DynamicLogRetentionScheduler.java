@@ -32,12 +32,18 @@ public class DynamicLogRetentionScheduler {
     private final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
+    /**
+     * Initializes the task scheduler and schedules the log deletion task according to the configured cron schedule.
+     */
     @PostConstruct
     public void scheduleLogDeletion() {
         taskScheduler.initialize();
         taskScheduler.schedule(this::applyLogRetentionPolicy, new CronTrigger(logDeletionCronScheduler));
     }
 
+    /**
+     * Applies the log retention policy by deleting log files that are older than the configured retention length.
+     */
     public void applyLogRetentionPolicy() {
         File logDir = new File(logFilePath);
         if (!logDir.exists() || !logDir.isDirectory()) {
