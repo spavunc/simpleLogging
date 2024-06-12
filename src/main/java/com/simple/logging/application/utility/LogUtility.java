@@ -301,7 +301,7 @@ public class LogUtility {
      * @param lines    the list of strings to write to the file
      * @throws IOException if an I/O error occurs during writing
      */
-    public static void generateFileWithLines(String fileName, List<String> lines) throws IOException {
+    public static void generateFileFromSearch(String fileName, List<String> lines) throws IOException {
         // Ensure that fileName is not null or empty
         Objects.requireNonNull(fileName, "File name must not be null");
         Objects.requireNonNull(lines, "Lines must not be null");
