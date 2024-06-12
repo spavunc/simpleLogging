@@ -1,5 +1,7 @@
 package com.simple.logging.application.utility;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,7 +13,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -53,15 +54,13 @@ public class LogUtility {
      *
      * @param sourcePath the path of the file to move
      * @param targetPath the target path
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized void moveFile(Path sourcePath, Path targetPath) throws IOException {
+    public static synchronized void moveFile(Path sourcePath, Path targetPath) {
         try {
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
             log.info("Moved file from {} to {}", sourcePath, targetPath);
         } catch (IOException e) {
             log.error("Failed to move file from {} to {}", sourcePath, targetPath, e);
-            throw e;
         }
     }
 
@@ -70,16 +69,14 @@ public class LogUtility {
      *
      * @param sourcePath the path of the file to rename
      * @param newName    the new name of the file
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized void renameFile(Path sourcePath, String newName) throws IOException {
+    public static synchronized void renameFile(Path sourcePath, String newName) {
         Path targetPath = sourcePath.resolveSibling(newName);
         try {
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
             log.info("Renamed file from {} to {}", sourcePath, targetPath);
         } catch (IOException e) {
             log.error("Failed to rename file from {} to {}", sourcePath, targetPath, e);
-            throw e;
         }
     }
 
@@ -87,15 +84,13 @@ public class LogUtility {
      * Deletes a file.
      *
      * @param filePath the path of the file to delete
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized void deleteFile(Path filePath) throws IOException {
+    public static synchronized void deleteFile(Path filePath) {
         try {
             Files.delete(filePath);
             log.info("Deleted file: {}", filePath);
         } catch (IOException e) {
             log.error("Failed to delete file: {}", filePath, e);
-            throw e;
         }
     }
 
@@ -104,9 +99,8 @@ public class LogUtility {
      * Only .log files are allowed to be compressed.
      *
      * @param filePath the path of the file to compress
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized void zipFile(Path filePath) throws IOException {
+    public static synchronized void zipFile(Path filePath) {
         // Ensure only .log files are processed
         if (!filePath.toString().endsWith(".log")) {
             throw new IllegalArgumentException("Only .log files can be compressed");
@@ -130,7 +124,6 @@ public class LogUtility {
             log.info("Compressed file {} to {}", filePath, zipFileName);
         } catch (IOException e) {
             log.error("Failed to compress file: {}", filePath, e);
-            throw e;
         }
     }
 
@@ -138,9 +131,8 @@ public class LogUtility {
      * Retrieves a list of all log files in the specified directory.
      *
      * @return a list of log files
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized List<File> getAllLogFiles() throws IOException {
+    public static synchronized List<File> getAllLogFiles() {
         File logDir = new File(UtilityObjects.logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
@@ -168,9 +160,8 @@ public class LogUtility {
      * @param startDate the start date (inclusive)
      * @param endDate   the end date (inclusive)
      * @return a list of log files between the specified dates
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized List<File> getLogFilesBetweenDates(LocalDate startDate, LocalDate endDate) throws IOException {
+    public static synchronized List<File> getLogFilesBetweenDates(LocalDate startDate, LocalDate endDate) {
         List<File> filteredLogFiles = new ArrayList<>();
         File logDir = new File(UtilityObjects.logFilePath);
 
@@ -189,12 +180,11 @@ public class LogUtility {
                 return filteredLogFiles;
             } catch (Exception e) {
                 log.error("Failed to retrieve log files from {} between {} and {}", logDir, startDate, endDate, e);
-                throw new IOException("Failed to retrieve log files", e);
             }
         } else {
             log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
-            return filteredLogFiles;
         }
+        return filteredLogFiles;
     }
 
     private static void findLogsBetweenDates(LocalDate startDate, LocalDate endDate, File[] logFiles, List<File> filteredLogFiles) {
@@ -218,9 +208,8 @@ public class LogUtility {
      *
      * @param date the date for which to retrieve log files
      * @return a list of log files for the specified date
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized List<File> getLogFilesForDate(LocalDate date) throws IOException {
+    public static synchronized List<File> getLogFilesForDate(LocalDate date) {
         List<File> filteredLogFiles = new ArrayList<>();
         File logDir = new File(UtilityObjects.logFilePath);
 
@@ -239,12 +228,11 @@ public class LogUtility {
                 return filteredLogFiles;
             } catch (Exception e) {
                 log.error("Failed to retrieve log files from {} for date {}", logDir, date, e);
-                throw new IOException("Failed to retrieve log files", e);
             }
         } else {
             log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
-            return filteredLogFiles;
         }
+        return filteredLogFiles;
     }
 
     private static void findLogsForSpecificDate(LocalDate date, File[] logFiles, List<File> filteredLogFiles) {
@@ -270,9 +258,8 @@ public class LogUtility {
      * @param filePath the path of the file to search
      * @param keyword  the keyword to search for
      * @return a list of matching lines
-     * @throws IOException if an I/O error occurs
      */
-    public static synchronized List<String> searchLogFile(Path filePath, String keyword) throws IOException {
+    public static synchronized List<String> searchLogFile(Path filePath, String keyword) {
         List<String> matchedLines = new ArrayList<>();
         // Ensure only .log files are accessed
         if (!filePath.toString().endsWith(".log")) {
@@ -288,7 +275,6 @@ public class LogUtility {
             }
         } catch (IOException e) {
             log.error("Failed to read log file: {}", filePath, e);
-            throw e;
         }
         return matchedLines;
     }
@@ -299,16 +285,8 @@ public class LogUtility {
      *
      * @param fileName the name of the file to create
      * @param lines    the list of strings to write to the file
-     * @throws IOException if an I/O error occurs during writing
      */
-    public static void generateFileFromSearch(String fileName, List<String> lines) throws IOException {
-        // Ensure that fileName is not null or empty
-        Objects.requireNonNull(fileName, "File name must not be null");
-        Objects.requireNonNull(lines, "Lines must not be null");
-        if (fileName.isEmpty()) {
-            throw new IllegalArgumentException("File name must not be empty");
-        }
-
+    public static void generateFileFromSearch(@NotNull String fileName, @NotEmpty List<String> lines) {
         Path filePath = Path.of(UtilityObjects.logFilePath, fileName + ".log");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath.toFile()))) {
             for (String line : lines) {
@@ -317,7 +295,6 @@ public class LogUtility {
             }
         } catch (IOException e) {
             log.error("Failed to write to file: {}", filePath, e);
-            throw e;
         }
     }
 }

@@ -28,7 +28,6 @@ public class PayloadHistory {
      */
     public static synchronized void addLog(Payload logEntry) {
         payloadHistoryList.add(logEntry);
-        log.info("Added log entry: {}", logEntry);
     }
 
     /**
@@ -55,7 +54,6 @@ public class PayloadHistory {
      * @return the list of {@link Payload} log entries
      */
     public static synchronized List<Payload> viewLogs() {
-        log.info("Viewing log entries, total count: {}", payloadHistoryList.size());
         return new ArrayList<>(payloadHistoryList);
     }
 }
