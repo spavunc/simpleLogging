@@ -1,7 +1,6 @@
 package com.simple.logging.application.configuration;
 
 import com.simple.logging.application.servlet.LoggableDispatcherServlet;
-import com.simple.logging.application.utility.LogUtility;
 import com.simple.logging.scheduler.DynamicLogRetentionScheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -26,23 +25,23 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final String logDeletionCronScheduler;
     private final String applicationName;
     private final boolean compressOldLogs;
-    private final boolean deleteCompressedLogs;
+    private final Integer zipOldLogFilesOlderThanDays;
     private final String zippedLogFilePath;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
      *
-     * @param maxFileSizeMb            the maximum size of the log file in megabytes.
-     * @param maxStringSizeMb          the maximum size of the request/response body to be logged in megabytes.
-     * @param logFilePath              the directory path where log files will be stored.
-     * @param zippedLogFilePath        the directory path where zipped log files will be stored.
-     * @param charset                  the character encoding to be used for logging.
-     * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
-     * @param logRetentionLengthInDays length in days how long are the log files kept before deletion.
-     * @param logDeletionCronScheduler cron scheduler how often are log files checked for deletion.
-     * @param applicationName          name of your application.
-     * @param compressOldLogs          compress old logs into a ZIP archive.
-     * @param deleteCompressedLogs     delete compressed logs on scheduler.
+     * @param maxFileSizeMb               the maximum size of the log file in megabytes.
+     * @param maxStringSizeMb             the maximum size of the request/response body to be logged in megabytes.
+     * @param logFilePath                 the directory path where log files will be stored.
+     * @param zippedLogFilePath           the directory path where zipped log files will be stored.
+     * @param charset                     the character encoding to be used for logging.
+     * @param maxCacheHistoryLogs         the maximum number of logs to be cached in memory.
+     * @param logRetentionLengthInDays    length in days how long are the log files kept before deletion.
+     * @param logDeletionCronScheduler    cron scheduler how often are log files checked for deletion.
+     * @param applicationName             name of your application.
+     * @param compressOldLogs             compress old logs into a ZIP archive.
+     * @param zipOldLogFilesOlderThanDays Zip files older than x days.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb:50}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb:5}") Integer maxStringSizeMb,
@@ -50,11 +49,11 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${logFilePath:logs/}") String zippedLogFilePath,
                                       @Value("${charset:UTF-8}") String charset,
                                       @Value("${maxCacheHistoryLogs:100}") Integer maxCacheHistoryLogs,
-                                      @Value("${logRetentionLengthInDays:5}") Integer logRetentionLengthInDays,
+                                      @Value("${logRetentionLengthInDays:15}") Integer logRetentionLengthInDays,
                                       @Value("${logDeletionCronScheduler:0 0 0 * * ?}") String logDeletionCronScheduler,
                                       @Value("${applicationName:application}") String applicationName,
                                       @Value("${compressOldLogs:true}") boolean compressOldLogs,
-                                      @Value("${deleteCompressedLogs:true}") boolean deleteCompressedLogs) {
+                                      @Value("${zipOldLogFilesOlderThanDays:4}") Integer zipOldLogFilesOlderThanDays) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
@@ -64,7 +63,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.logDeletionCronScheduler = logDeletionCronScheduler;
         this.applicationName = applicationName;
         this.compressOldLogs = compressOldLogs;
-        this.deleteCompressedLogs = deleteCompressedLogs;
+        this.zipOldLogFilesOlderThanDays = zipOldLogFilesOlderThanDays;
         this.zippedLogFilePath = zippedLogFilePath;
     }
 
@@ -97,7 +96,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean
     public DynamicLogRetentionScheduler dynamicLogRetentionScheduler() {
         return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler,
-                logFilePath, applicationName, compressOldLogs, deleteCompressedLogs, zippedLogFilePath);
+                logFilePath, applicationName, compressOldLogs, zipOldLogFilesOlderThanDays, zippedLogFilePath);
     }
 
     /**
@@ -106,7 +105,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @return the configured LogUtility instance.
      */
     @Bean
-    public LogUtility logUtility() {
-        return new LogUtility(logFilePath, applicationName);
+    public LogUtilityConfiguration logUtilityConfiguration() {
+        return new LogUtilityConfiguration(logFilePath, applicationName);
     }
 }

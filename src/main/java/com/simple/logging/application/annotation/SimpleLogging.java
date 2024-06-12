@@ -24,7 +24,9 @@ public @interface SimpleLogging {
 
     int maxCacheHistoryLogs() default 100;
 
-    int logRetentionLengthInDays() default 5;
+    int logRetentionLengthInDays() default 15;
+
+    int zipOldLogFilesOlderThanDays() default 4;
 
     String logDeletionCronScheduler() default "0 0 0 * * ?";
 
@@ -32,5 +34,4 @@ public @interface SimpleLogging {
 
     boolean compressOldLogs() default true;
 
-    boolean deleteCompressedLogs() default true;
 }

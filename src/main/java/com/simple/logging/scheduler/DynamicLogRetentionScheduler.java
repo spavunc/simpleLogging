@@ -28,16 +28,16 @@ public class DynamicLogRetentionScheduler {
     private final String logFilePath;
     private final String applicationName;
     private final boolean compressOldLogs;
-    private final boolean deleteCompressedLogs;
+    private final Integer zipOldLogFilesOlderThanDays;
     private final String zippedLogFilePath;
 
-    public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFIlePath, String applicationName, boolean compressOldLogs, boolean deleteCompressedLogs, String zippedLogFilePath) {
+    public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFilePath, String applicationName, boolean compressOldLogs, Integer zipOldLogFilesOlderThanDays, String zippedLogFilePath) {
         this.logRetentionLengthInDays = logRetentionLengthInDays;
         this.logDeletionCronScheduler = logDeletionCronScheduler;
-        this.logFilePath = logFIlePath;
+        this.logFilePath = logFilePath;
         this.applicationName = applicationName;
         this.compressOldLogs = compressOldLogs;
-        this.deleteCompressedLogs = deleteCompressedLogs;
+        this.zipOldLogFilesOlderThanDays = zipOldLogFilesOlderThanDays;
         this.zippedLogFilePath = zippedLogFilePath;
     }
 
@@ -94,7 +94,7 @@ public class DynamicLogRetentionScheduler {
 
             // Compress old logs into a ZIP archive, if compressLogFile returns true,
             // it means the ZIP has been created and original file can be deleted
-            if (daysBetween >= 1 && compressOldLogs) {
+            if (daysBetween >= zipOldLogFilesOlderThanDays && compressOldLogs) {
                 if (compressLogFile(logFile)) {
                     Files.delete(logFile.toPath());
                     log.info("Deleted log file: " + logFile.getName());
@@ -105,18 +105,6 @@ public class DynamicLogRetentionScheduler {
             // Delete old logs
             if (daysBetween > logRetentionLengthInDays) {
                 if (logFile.getName().endsWith(".zip")) {
-                    // If file is a ZIP and deleteCompressedLogs is true, delete it
-                    if (deleteCompressedLogs) {
-                        try {
-                            Files.delete(logFile.toPath());
-                            log.info("Deleted compressed log file: {}", logFile.getName());
-                            logsDeletedCounter++;
-                        } catch (Exception e) {
-                            log.error("Failed to delete compressed log file: {}", logFile.getName(), e);
-                        }
-                    }
-                } else {
-                    // If file is not a ZIP, delete it
                     try {
                         Files.delete(logFile.toPath());
                         log.info("Deleted log file: {}", logFile.getName());

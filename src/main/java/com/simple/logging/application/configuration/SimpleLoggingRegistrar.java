@@ -35,7 +35,7 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(attributes.getString("logDeletionCronScheduler"));
         builder.addConstructorArgValue(attributes.getString("applicationName"));
         builder.addConstructorArgValue(attributes.getBoolean("compressOldLogs"));
-        builder.addConstructorArgValue(attributes.getBoolean("deleteCompressedLogs"));
+        builder.addConstructorArgValue(attributes.getNumber("zipOldLogFilesOlderThanDays"));
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }
