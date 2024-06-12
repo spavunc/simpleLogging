@@ -1,4 +1,4 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +19,5 @@ public class Payload {
     private String requestBody;
     private String responseBody;
     private LocalDateTime timestamp;
+    private String uuid;
 }

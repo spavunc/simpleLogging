@@ -1,5 +1,6 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.configuration;
 
+import com.simple.logging.application.annotation.SimpleLogging;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
@@ -27,11 +28,14 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(attributes.getNumber("maxFileSizeMb"));
         builder.addConstructorArgValue(attributes.getNumber("maxStringSizeMb"));
         builder.addConstructorArgValue(attributes.getString("logFilePath"));
+        builder.addConstructorArgValue(attributes.getString("zippedLogFilePath"));
         builder.addConstructorArgValue(attributes.getString("charset"));
         builder.addConstructorArgValue(attributes.getNumber("maxCacheHistoryLogs"));
         builder.addConstructorArgValue(attributes.getNumber("logRetentionLengthInDays"));
         builder.addConstructorArgValue(attributes.getString("logDeletionCronScheduler"));
         builder.addConstructorArgValue(attributes.getString("applicationName"));
+        builder.addConstructorArgValue(attributes.getBoolean("compressOldLogs"));
+        builder.addConstructorArgValue(attributes.getNumber("zipOldLogFilesOlderThanDays"));
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }

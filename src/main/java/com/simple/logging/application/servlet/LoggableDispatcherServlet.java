@@ -1,5 +1,9 @@
-package com.simple.logging.configuration;
+package com.simple.logging.application.servlet;
 
+import com.simple.logging.application.configuration.CustomLogFormatter;
+import com.simple.logging.application.annotation.IgnoreLogging;
+import com.simple.logging.application.payload.Payload;
+import com.simple.logging.application.utility.PayloadHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +23,8 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -98,7 +104,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      */
     @Override
-    protected void doDispatch(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) {
+    protected void doDispatch(@NotNull HttpServletRequest request,
+        @NotNull HttpServletResponse response) {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -123,8 +130,11 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param handler         the handler for the request.
      * @throws IOException if an input or output exception occurs.
      */
-    private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler)
+    private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache,
+        HandlerExecutionChain handler)
             throws IOException {
+
+        String uuid = UUID.randomUUID().toString();
 
         Payload log = Payload.builder()
                 .httpMethod(requestToCache.getMethod())
@@ -132,8 +142,10 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .httpStatus(responseToCache.getStatus())
                 .requestHandler(handler.getHandler().toString())
                 .timestamp(LocalDateTime.now())
+                .uuid(uuid)
                 .build();
 
+        LOGGER.info(() -> "LOG UUID - " + uuid);
         LOGGER.info(() -> "HTTP METHOD - " + log.getHttpMethod());
         LOGGER.info("REQUEST URL - " + log.getRequestUrl());
         LOGGER.info(() -> "REQUEST HANDLER - " + log.getRequestHandler());
@@ -144,7 +156,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
 
         // Delete first element if the list is overflown
         if (PayloadHistory.viewLogs().size() >= maxCacheHistoryLogs) {
-            PayloadHistory.viewLogs().remove(0);
+            Optional<Payload> firstPayload = PayloadHistory.viewLogs().stream().findFirst();
+            firstPayload.ifPresent(PayloadHistory::removeLog);
         }
 
         PayloadHistory.addLog(log);
