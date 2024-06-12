@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -103,7 +104,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      */
     @Override
-    protected void doDispatch(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) {
+    protected void doDispatch(@NotNull HttpServletRequest request,
+        @NotNull HttpServletResponse response) {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -128,7 +130,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param handler         the handler for the request.
      * @throws IOException if an input or output exception occurs.
      */
-    private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache, HandlerExecutionChain handler)
+    private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache,
+        HandlerExecutionChain handler)
             throws IOException {
 
         String uuid = UUID.randomUUID().toString();
@@ -153,7 +156,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
 
         // Delete first element if the list is overflown
         if (PayloadHistory.viewLogs().size() >= maxCacheHistoryLogs) {
-            PayloadHistory.viewLogs().remove(0);
+            Optional<Payload> firstPayload = PayloadHistory.viewLogs().stream().findFirst();
+            firstPayload.ifPresent(PayloadHistory::removeLog);
         }
 
         PayloadHistory.addLog(log);
