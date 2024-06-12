@@ -28,15 +28,15 @@ public class CustomLogFormatter extends Formatter {
      */
     @Override
     public String format(LogRecord logRecord) {
-      String throwable = "";
-      if (logRecord.getThrown() != null) {
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        pw.println();
-        logRecord.getThrown().printStackTrace(pw);
-        pw.close();
-        throwable = sw.toString();
-      }
+        String throwable = "";
+        if (logRecord.getThrown() != null) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            pw.println();
+            logRecord.getThrown().printStackTrace(pw);
+            pw.close();
+            throwable = sw.toString();
+        }
         return dateTimeFormatter.format(LocalDateTime.now()) +
                 " " +
                 logRecord.getLevel().getName() +
