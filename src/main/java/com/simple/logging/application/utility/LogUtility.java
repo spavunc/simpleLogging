@@ -17,6 +17,7 @@ import java.util.zip.ZipOutputStream;
 public class LogUtility {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String FILE_NAME_REGEX = "-\\d{4}-\\d{2}-\\d{2}.*";
     private final String logFilePath;
     private final String applicationName;
 
@@ -109,9 +110,8 @@ public class LogUtility {
      * Retrieves a list of all log files in the specified directory.
      *
      * @return a list of log files
-     * @throws IOException if an I/O error occurs
      */
-    public synchronized List<File> getAllLogFiles() throws IOException {
+    public synchronized List<File> getAllLogFiles() {
         File logDir = new File(logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
@@ -120,7 +120,7 @@ public class LogUtility {
         }
 
         try {
-            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
+            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + FILE_NAME_REGEX));
             if (logFiles != null) {
                 log.info("Retrieved {} log files from {}", logFiles.length, logDir);
                 return List.of(logFiles);
@@ -129,8 +129,8 @@ public class LogUtility {
             }
         } catch (Exception e) {
             log.error("Failed to retrieve log files from {}", logDir, e);
-            throw new IOException("Failed to retrieve log files", e);
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -151,7 +151,7 @@ public class LogUtility {
         }
 
         try {
-            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
+            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + FILE_NAME_REGEX));
             if (logFiles != null) {
                 for (File logFile : logFiles) {
                     String datePart = logFile.getName().substring(logFile.getName().lastIndexOf('-') + 1, logFile.getName().length() - 4);
@@ -186,7 +186,7 @@ public class LogUtility {
         }
 
         try {
-            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
+            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + FILE_NAME_REGEX));
             if (logFiles != null) {
                 for (File logFile : logFiles) {
                     String datePart = logFile.getName().substring(logFile.getName().lastIndexOf('-') + 1, logFile.getName().length() - 4);

@@ -24,7 +24,7 @@ public @interface SimpleLogging {
 
     int maxCacheHistoryLogs() default 100;
 
-    int logRetentionLengthInDays() default 5;
+    int logRetentionLengthInDays() default 14;
 
     String logDeletionCronScheduler() default "0 0 0 * * ?";
 
