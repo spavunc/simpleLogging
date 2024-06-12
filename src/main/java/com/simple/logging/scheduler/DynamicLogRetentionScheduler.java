@@ -59,7 +59,7 @@ public class DynamicLogRetentionScheduler {
                 try {
                     applyLogRetentionPolicy();
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    log.error("Something went wrong when applying log retention policy: {}", logDeletionCronScheduler, e);
                 }
             }, new CronTrigger(logDeletionCronScheduler));
         } catch (IllegalArgumentException e) {
@@ -94,29 +94,37 @@ public class DynamicLogRetentionScheduler {
 
             // Compress old logs into a ZIP archive, if compressLogFile returns true,
             // it means the ZIP has been created and original file can be deleted
-            if (daysBetween >= zipOldLogFilesOlderThanDays && compressOldLogs) {
-                if (compressLogFile(logFile)) {
-                    Files.delete(logFile.toPath());
-                    log.info("Deleted log file: " + logFile.getName());
-                    continue;
-                }
+            if (daysBetween >= zipOldLogFilesOlderThanDays && compressOldLogs && compressLogFile(logFile)) {
+                Files.delete(logFile.toPath());
+                log.info("Deleted log file: " + logFile.getName());
+                continue;
             }
+            logsDeletedCounter = deleteOldLogs(daysBetween, logFile, logsDeletedCounter);
+        }
+        log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
+    }
 
-            // Delete old logs
-            if (daysBetween > logRetentionLengthInDays) {
-                if (logFile.getName().endsWith(".zip")) {
-                    try {
-                        Files.delete(logFile.toPath());
-                        log.info("Deleted log file: {}", logFile.getName());
-                        logsDeletedCounter++;
-                    } catch (Exception e) {
-                        log.error("Failed to delete log file: {}", logFile.getName(), e);
-                    }
-                }
+    /**
+     * Handles the deletion of log files.
+     *
+     * @param daysBetween        how many days have passed between the creation of the log
+     * @param logFile            the log file to be deleted
+     * @param logsDeletedCounter how many files have been deleted during the process so far
+     */
+    public Integer deleteOldLogs(long daysBetween, File logFile, Integer logsDeletedCounter) {
+        Integer logsDeleted = logsDeletedCounter;
+        if (daysBetween > logRetentionLengthInDays) {
+            try {
+                Files.delete(logFile.toPath());
+                log.info("Deleted log file: {}", logFile.getName());
+                logsDeleted++;
+            } catch (Exception e) {
+                log.error("Failed to delete log file: {}", logFile.getName(), e);
             }
         }
 
         log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
+        return logsDeleted;
     }
 
     /**

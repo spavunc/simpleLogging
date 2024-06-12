@@ -17,7 +17,9 @@ import java.util.zip.ZipOutputStream;
 
 @Slf4j
 public class LogUtility {
+
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String FILE_NAME_REGEX = "-\\d{4}-\\d{2}-\\d{2}.*";
 
     private LogUtility() {
         throw new IllegalStateException("Utility class");
@@ -150,8 +152,8 @@ public class LogUtility {
             }
         } catch (Exception e) {
             log.error("Failed to retrieve log files from {}", logDir, e);
-            throw new IOException("Failed to retrieve log files", e);
         }
+        return new ArrayList<>();
     }
 
     /**
@@ -164,7 +166,13 @@ public class LogUtility {
      */
     public static synchronized List<File> getLogFilesBetweenDates(LocalDate startDate, LocalDate endDate) throws IOException {
         List<File> filteredLogFiles = new ArrayList<>();
-        File logDir = new File(LogUtility.UtilityObjects.logFilePath);
+        File logDir = new File(UtilityObjects.logFilePath);
+
+        if (!logDir.exists() || !logDir.isDirectory()) {
+            log.warn("Log directory does not exist: " + UtilityObjects.logFilePath);
+            return filteredLogFiles;
+        }
+
         if (logDir.exists() && logDir.isDirectory()) {
             try {
                 File[] logFiles = logDir.listFiles((dir, name) -> name.matches(LogUtility.UtilityObjects.applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
@@ -205,6 +213,12 @@ public class LogUtility {
     public static synchronized List<File> getLogFilesForDate(LocalDate date) throws IOException {
         List<File> filteredLogFiles = new ArrayList<>();
         File logDir = new File(LogUtility.UtilityObjects.logFilePath);
+
+        if (!logDir.exists() || !logDir.isDirectory()) {
+            log.warn("Log directory does not exist: {}", UtilityObjects.logFilePath);
+            return filteredLogFiles;
+        }
+
         if (logDir.exists() && logDir.isDirectory()) {
             try {
                 File[] logFiles = logDir.listFiles((dir, name) -> name.matches(LogUtility.UtilityObjects.applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));

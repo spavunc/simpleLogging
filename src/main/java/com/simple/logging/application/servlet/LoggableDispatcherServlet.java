@@ -142,7 +142,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .uuid(uuid)
                 .build();
 
-        LOGGER.info("LOG UUID - " + uuid);
+        LOGGER.info(() -> "LOG UUID - " + uuid);
         LOGGER.info(() -> "HTTP METHOD - " + log.getHttpMethod());
         LOGGER.info("REQUEST URL - " + log.getRequestUrl());
         LOGGER.info(() -> "REQUEST HANDLER - " + log.getRequestHandler());
