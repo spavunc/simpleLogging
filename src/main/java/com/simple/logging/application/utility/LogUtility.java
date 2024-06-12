@@ -19,7 +19,8 @@ import java.util.zip.ZipOutputStream;
 public class LogUtility {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final String FILE_NAME_REGEX = "-\\d{4}-\\d{2}-\\d{2}.*";
+    private static final String FILE_NAME_REGEX = "-\\d{4}-\\d{2}-\\d{2}.*\\.log";
+    private static final String DIRECTORY_NOT_EXIST = "Log directory does not exist: {}";
 
     private LogUtility() {
         throw new IllegalStateException("Utility class");
@@ -29,6 +30,11 @@ public class LogUtility {
     public static class UtilityObjects {
         private static String logFilePath;
         private static String applicationName;
+
+        // Private constructor to hide the implicit public one
+        private UtilityObjects() {
+            throw new UnsupportedOperationException("UtilityObjects is a utility class and cannot be instantiated");
+        }
 
         /**
          * Sets the configuration values.
@@ -143,7 +149,7 @@ public class LogUtility {
         }
 
         try {
-            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + "-\\d{4}-\\d{2}-\\d{2}.*\\.log"));
+            File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
             if (logFiles != null) {
                 log.info("Retrieved {} log files from {}", logFiles.length, logDir);
                 return List.of(logFiles);
@@ -175,21 +181,9 @@ public class LogUtility {
 
         if (logDir.exists() && logDir.isDirectory()) {
             try {
-                File[] logFiles = logDir.listFiles((dir, name) -> name.matches(LogUtility.UtilityObjects.applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
+                File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
                 if (logFiles != null) {
-                    for (File logFile : logFiles) {
-                        if (!logFile.getName().endsWith(".log"))
-                            continue;
-                        // Extract the date part from filename correctly
-                        String datePart = logFile.getName().substring(
-                                LogUtility.UtilityObjects.applicationName.length() + 1,
-                                LogUtility.UtilityObjects.applicationName.length() + 11
-                        );
-                        LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
-                        if ((fileDate.isEqual(startDate) || fileDate.isAfter(startDate)) && (fileDate.isEqual(endDate) || fileDate.isBefore(endDate))) {
-                            filteredLogFiles.add(logFile);
-                        }
-                    }
+                    findLogsBetweenDates(startDate, endDate, logFiles, filteredLogFiles);
                     log.info("Retrieved {} log files from {} between {} and {}", filteredLogFiles.size(), logDir, startDate, endDate);
                 }
                 return filteredLogFiles;
@@ -198,8 +192,24 @@ public class LogUtility {
                 throw new IOException("Failed to retrieve log files", e);
             }
         } else {
-            log.warn("Log directory does not exist: {}", LogUtility.UtilityObjects.logFilePath);
+            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
             return filteredLogFiles;
+        }
+    }
+
+    private static void findLogsBetweenDates(LocalDate startDate, LocalDate endDate, File[] logFiles, List<File> filteredLogFiles) {
+        for (File logFile : logFiles) {
+            if (!logFile.getName().endsWith(".log"))
+                continue;
+            // Extract the date part from filename correctly
+            String datePart = logFile.getName().substring(
+                    UtilityObjects.applicationName.length() + 1,
+                    UtilityObjects.applicationName.length() + 11
+            );
+            LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
+            if ((fileDate.isEqual(startDate) || fileDate.isAfter(startDate)) && (fileDate.isEqual(endDate) || fileDate.isBefore(endDate))) {
+                filteredLogFiles.add(logFile);
+            }
         }
     }
 
@@ -212,30 +222,18 @@ public class LogUtility {
      */
     public static synchronized List<File> getLogFilesForDate(LocalDate date) throws IOException {
         List<File> filteredLogFiles = new ArrayList<>();
-        File logDir = new File(LogUtility.UtilityObjects.logFilePath);
+        File logDir = new File(UtilityObjects.logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
-            log.warn("Log directory does not exist: {}", UtilityObjects.logFilePath);
+            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
             return filteredLogFiles;
         }
 
         if (logDir.exists() && logDir.isDirectory()) {
             try {
-                File[] logFiles = logDir.listFiles((dir, name) -> name.matches(LogUtility.UtilityObjects.applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
+                File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
                 if (logFiles != null) {
-                    for (File logFile : logFiles) {
-                        if (!logFile.getName().endsWith(".log"))
-                            continue;
-                        // Extract the date part from filename correctly
-                        String datePart = logFile.getName().substring(
-                                LogUtility.UtilityObjects.applicationName.length() + 1,
-                                LogUtility.UtilityObjects.applicationName.length() + 11
-                        );
-                        LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
-                        if (fileDate.isEqual(date)) {
-                            filteredLogFiles.add(logFile);
-                        }
-                    }
+                    findLogsForSpecificDate(date, logFiles, filteredLogFiles);
                     log.info("Retrieved {} log files from {} for date {}", filteredLogFiles.size(), logDir, date);
                 }
                 return filteredLogFiles;
@@ -244,8 +242,24 @@ public class LogUtility {
                 throw new IOException("Failed to retrieve log files", e);
             }
         } else {
-            log.warn("Log directory does not exist: {}", LogUtility.UtilityObjects.logFilePath);
+            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
             return filteredLogFiles;
+        }
+    }
+
+    private static void findLogsForSpecificDate(LocalDate date, File[] logFiles, List<File> filteredLogFiles) {
+        for (File logFile : logFiles) {
+            if (!logFile.getName().endsWith(".log"))
+                continue;
+            // Extract the date part from filename correctly
+            String datePart = logFile.getName().substring(
+                    UtilityObjects.applicationName.length() + 1,
+                    UtilityObjects.applicationName.length() + 11
+            );
+            LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
+            if (fileDate.isEqual(date)) {
+                filteredLogFiles.add(logFile);
+            }
         }
     }
 
