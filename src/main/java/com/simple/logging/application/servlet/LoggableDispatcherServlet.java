@@ -3,7 +3,7 @@ package com.simple.logging.application.servlet;
 import com.simple.logging.application.configuration.CustomLogFormatter;
 import com.simple.logging.application.annotation.IgnoreLogging;
 import com.simple.logging.application.payload.Payload;
-import com.simple.logging.application.payload.PayloadHistory;
+import com.simple.logging.application.utility.PayloadHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;

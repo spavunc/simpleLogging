@@ -28,6 +28,7 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(attributes.getNumber("maxFileSizeMb"));
         builder.addConstructorArgValue(attributes.getNumber("maxStringSizeMb"));
         builder.addConstructorArgValue(attributes.getString("logFilePath"));
+        builder.addConstructorArgValue(attributes.getString("zippedLogFilePath"));
         builder.addConstructorArgValue(attributes.getString("charset"));
         builder.addConstructorArgValue(attributes.getNumber("maxCacheHistoryLogs"));
         builder.addConstructorArgValue(attributes.getNumber("logRetentionLengthInDays"));

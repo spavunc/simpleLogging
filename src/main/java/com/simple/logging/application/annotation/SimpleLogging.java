@@ -18,6 +18,8 @@ public @interface SimpleLogging {
 
     String logFilePath() default "logs";
 
+    String zippedLogFilePath() default "logs";
+
     String charset() default "UTF-8";
 
     int maxCacheHistoryLogs() default 100;

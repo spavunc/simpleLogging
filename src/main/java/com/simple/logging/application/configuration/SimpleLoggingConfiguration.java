@@ -1,6 +1,7 @@
 package com.simple.logging.application.configuration;
 
 import com.simple.logging.application.servlet.LoggableDispatcherServlet;
+import com.simple.logging.application.utility.LogUtility;
 import com.simple.logging.scheduler.DynamicLogRetentionScheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -26,6 +27,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final String applicationName;
     private final boolean compressOldLogs;
     private final boolean deleteCompressedLogs;
+    private final String zippedLogFilePath;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -33,6 +35,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param maxFileSizeMb            the maximum size of the log file in megabytes.
      * @param maxStringSizeMb          the maximum size of the request/response body to be logged in megabytes.
      * @param logFilePath              the directory path where log files will be stored.
+     * @param zippedLogFilePath        the directory path where zipped log files will be stored.
      * @param charset                  the character encoding to be used for logging.
      * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
      * @param logRetentionLengthInDays length in days how long are the log files kept before deletion.
@@ -43,7 +46,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb:50}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb:5}") Integer maxStringSizeMb,
-                                      @Value("${logFilePath:logs}") String logFilePath,
+                                      @Value("${logFilePath:logs/}") String logFilePath,
+                                      @Value("${logFilePath:logs/}") String zippedLogFilePath,
                                       @Value("${charset:UTF-8}") String charset,
                                       @Value("${maxCacheHistoryLogs:100}") Integer maxCacheHistoryLogs,
                                       @Value("${logRetentionLengthInDays:5}") Integer logRetentionLengthInDays,
@@ -61,6 +65,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.applicationName = applicationName;
         this.compressOldLogs = compressOldLogs;
         this.deleteCompressedLogs = deleteCompressedLogs;
+        this.zippedLogFilePath = zippedLogFilePath;
     }
 
     /**
@@ -92,6 +97,16 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean
     public DynamicLogRetentionScheduler dynamicLogRetentionScheduler() {
         return new DynamicLogRetentionScheduler(logRetentionLengthInDays, logDeletionCronScheduler,
-                logFilePath, applicationName, compressOldLogs, deleteCompressedLogs);
+                logFilePath, applicationName, compressOldLogs, deleteCompressedLogs, zippedLogFilePath);
+    }
+
+    /**
+     * Creates and configures a new instance of LogUtility.
+     *
+     * @return the configured LogUtility instance.
+     */
+    @Bean
+    public LogUtility logUtility() {
+        return new LogUtility(logFilePath, applicationName);
     }
 }

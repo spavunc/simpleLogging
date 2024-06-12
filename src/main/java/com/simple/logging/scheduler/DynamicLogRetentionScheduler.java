@@ -29,14 +29,16 @@ public class DynamicLogRetentionScheduler {
     private final String applicationName;
     private final boolean compressOldLogs;
     private final boolean deleteCompressedLogs;
+    private final String zippedLogFilePath;
 
-    public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFIlePath, String applicationName, boolean compressOldLogs, boolean deleteCompressedLogs) {
+    public DynamicLogRetentionScheduler(Integer logRetentionLengthInDays, String logDeletionCronScheduler, String logFIlePath, String applicationName, boolean compressOldLogs, boolean deleteCompressedLogs, String zippedLogFilePath) {
         this.logRetentionLengthInDays = logRetentionLengthInDays;
         this.logDeletionCronScheduler = logDeletionCronScheduler;
         this.logFilePath = logFIlePath;
         this.applicationName = applicationName;
         this.compressOldLogs = compressOldLogs;
         this.deleteCompressedLogs = deleteCompressedLogs;
+        this.zippedLogFilePath = zippedLogFilePath;
     }
 
     /**
@@ -144,7 +146,7 @@ public class DynamicLogRetentionScheduler {
         if (logFile.getName().endsWith(".zip")) return false;
 
         log.info("Compressing {}...", logFile.getName());
-        String zipFileName = logFile.getAbsolutePath() + ".zip";
+        String zipFileName = zippedLogFilePath + logFile.getName() + ".zip";
         try (FileOutputStream fos = new FileOutputStream(zipFileName); ZipOutputStream zos = new ZipOutputStream(fos); FileInputStream fis = new FileInputStream(logFile)) {
 
             ZipEntry zipEntry = new ZipEntry(logFile.getName());
