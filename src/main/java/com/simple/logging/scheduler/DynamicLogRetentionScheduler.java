@@ -96,10 +96,12 @@ public class DynamicLogRetentionScheduler {
             // it means the ZIP has been created and original file can be deleted
             if (daysBetween >= zipOldLogFilesOlderThanDays && compressOldLogs && compressLogFile(logFile)) {
                 Files.delete(logFile.toPath());
+                logsDeletedCounter++;
                 log.info("Deleted log file: " + logFile.getName());
                 continue;
             }
-            logsDeletedCounter = deleteOldLogs(daysBetween, logFile, logsDeletedCounter);
+
+            logsDeletedCounter += deleteOldLogs(daysBetween, logFile);
         }
         log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
     }
@@ -109,10 +111,9 @@ public class DynamicLogRetentionScheduler {
      *
      * @param daysBetween        how many days have passed between the creation of the log
      * @param logFile            the log file to be deleted
-     * @param logsDeletedCounter how many files have been deleted during the process so far
      */
-    public Integer deleteOldLogs(long daysBetween, File logFile, Integer logsDeletedCounter) {
-        Integer logsDeleted = logsDeletedCounter;
+    public Integer deleteOldLogs(long daysBetween, File logFile) {
+        Integer logsDeleted = 0;
         if (daysBetween > logRetentionLengthInDays) {
             try {
                 Files.delete(logFile.toPath());
@@ -123,7 +124,6 @@ public class DynamicLogRetentionScheduler {
             }
         }
 
-        log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
         return logsDeleted;
     }
 
