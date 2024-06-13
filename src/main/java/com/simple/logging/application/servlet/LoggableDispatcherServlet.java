@@ -211,7 +211,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 log.getUuid() + " RESPONSE BODY: {0}" :
                 log.getUuid() + " REQUEST BODY: {0}";
             if (!jsonStringFromByteArray.isBlank()) {
-                LOGGER.log(Level.INFO,  payloadMarker, jsonStringFromByteArray);
+                LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {
