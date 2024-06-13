@@ -1,8 +1,9 @@
 package com.simple.logging.application.servlet;
 
-import com.simple.logging.application.configuration.CustomLogFormatter;
+import com.simple.logging.application.configuration.CustomFileHandler;
 import com.simple.logging.application.annotation.IgnoreLogging;
-import com.simple.logging.application.payload.Payload;
+import com.simple.logging.application.model.CustomLogProperties;
+import com.simple.logging.application.model.Payload;
 import com.simple.logging.application.utility.PayloadHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,12 +18,9 @@ import org.springframework.web.util.WebUtils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.FileHandler;
@@ -45,6 +43,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private final String charset;
     private final Integer maxCacheHistoryLogs;
     private final String applicationName;
+    private final String loggingLevel;
 
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
@@ -57,13 +56,15 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param applicationName          name of your application.
      */
     public LoggableDispatcherServlet(Integer maxFileSizeMb, Integer maxStringSizeMb, String logFilePath,
-                                     String charset, Integer maxCacheHistoryLogs, String applicationName) {
+                                     String charset, Integer maxCacheHistoryLogs, String applicationName,
+                                     String loggingLevel) {
         this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
         this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
         this.applicationName = applicationName;
+        this.loggingLevel = loggingLevel;
         setupLogger();
     }
 
@@ -72,28 +73,23 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      */
     private void setupLogger() {
         try {
-            // Ensure logs directory exists
-            Path logsPath = Paths.get(logFilePath);
-            if (!Files.exists(logsPath)) {
-                Files.createDirectories(logsPath);
-            }
-
-            // Define log filename with date
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            String dateTime = LocalDate.now().format(dtf);
-            Path logFile = logsPath.resolve(applicationName + "-" + dateTime + ".log");
-
             // Create FileHandler with size limit and rotating file pattern
-            FileHandler fileHandler = new FileHandler(logFile.toString(), maxFileSizeMb, 1, true);
-            fileHandler.setFormatter(new CustomLogFormatter());
-            fileHandler.setEncoding(Charset.forName(charset).toString());
-
+            FileHandler fileHandler = new CustomFileHandler(Paths.get(logFilePath), maxFileSizeMb, 5,
+                                                            Charset.forName(charset), applicationName);
             // Add the FileHandler to the logger.
             LOGGER.addHandler(fileHandler);
-            LOGGER.setLevel(Level.ALL); // Log all levels
-            LOGGER.setUseParentHandlers(false); // Disable console logging, if desired
+            setLoggingLevel();
+            LOGGER.setUseParentHandlers(false);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Failed to set up file logging", e);
+        }
+    }
+
+    private void setLoggingLevel() {
+        try {
+            LOGGER.setLevel(Level.parse(loggingLevel));
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Invalid logging level, logging level will be set to ALL");
         }
     }
 
@@ -119,6 +115,9 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             executeLogDispatch(request, response, handler);
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, String.format("Exception occurred - %s", ex.getMessage()), ex);
+        } finally {
+            // Clear custom properties after logging
+            CustomLogProperties.clear();
         }
     }
 
@@ -145,11 +144,16 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .uuid(uuid)
                 .build();
 
-        LOGGER.info(() -> "LOG UUID - " + uuid);
-        LOGGER.info(() -> "HTTP METHOD - " + log.getHttpMethod());
-        LOGGER.info("REQUEST URL - " + log.getRequestUrl());
-        LOGGER.info(() -> "REQUEST HANDLER - " + log.getRequestHandler());
-        LOGGER.info("HTTP STATUS - " + log.getHttpStatus());
+        LOGGER.info(() -> uuid + " HTTP METHOD - " + log.getHttpMethod());
+        LOGGER.info(() -> uuid + " REQUEST URL - " + log.getRequestUrl());
+        LOGGER.info(() -> uuid + " REQUEST HANDLER - " + log.getRequestHandler());
+        LOGGER.info(() -> uuid + " HTTP STATUS - " + log.getHttpStatus());
+
+        // Log custom properties
+        Map<String, String> customProperties = CustomLogProperties.getProperties();
+        for (Map.Entry<String, String> entry : customProperties.entrySet()) {
+            LOGGER.info(() -> uuid + " " + entry.getKey() + " - " + entry.getValue());
+        }
 
         getRequestPayload(requestToCache, log);
         getResponsePayload(responseToCache, log);
@@ -203,9 +207,11 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private void printWrapper(byte[] byteArray, boolean isPayloadResponse, Payload log) {
         if (byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
-            String payloadMarker = isPayloadResponse ? "RESPONSE BODY: {0}" : "REQUEST BODY: {0}";
+            String payloadMarker = isPayloadResponse ?
+                log.getUuid() + " RESPONSE BODY: {0}" :
+                log.getUuid() + " REQUEST BODY: {0}";
             if (!jsonStringFromByteArray.isBlank()) {
-                LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
+                LOGGER.log(Level.INFO,  payloadMarker, jsonStringFromByteArray);
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {

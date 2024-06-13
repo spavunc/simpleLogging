@@ -1,6 +1,6 @@
 package com.simple.logging.application.utility;
 
-import com.simple.logging.application.payload.Payload;
+import com.simple.logging.application.model.Payload;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;

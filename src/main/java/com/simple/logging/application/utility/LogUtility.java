@@ -102,11 +102,11 @@ public class LogUtility {
      */
     public static synchronized void zipFile(Path filePath) {
         // Ensure only .log files are processed
-        if (!filePath.toString().endsWith(".log")) {
+        if (!filePath.endsWith(".log")) {
             throw new IllegalArgumentException("Only .log files can be compressed");
         }
 
-        String zipFileName = filePath.toString() + ".zip";
+        String zipFileName = filePath + ".zip";
         try (FileOutputStream fos = new FileOutputStream(zipFileName);
              ZipOutputStream zos = new ZipOutputStream(fos);
              FileInputStream fis = new FileInputStream(filePath.toFile())) {

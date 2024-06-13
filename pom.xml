@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.simple</groupId>
 	<artifactId>logging</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<name>logging</name>
 	<description>Simple Logging for Spring Boot</description>
 	<properties>
@@ -43,6 +43,10 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
         </dependency>
     </dependencies>
 

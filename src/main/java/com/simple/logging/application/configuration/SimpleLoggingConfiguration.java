@@ -27,6 +27,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final boolean compressOldLogs;
     private final Integer zipOldLogFilesOlderThanDays;
     private final String zippedLogFilePath;
+    private final String loggingLevel;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -41,7 +42,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param logDeletionCronScheduler    cron scheduler how often are log files checked for deletion.
      * @param applicationName             name of your application.
      * @param compressOldLogs             compress old logs into a ZIP archive.
-     * @param zipOldLogFilesOlderThanDays Zip files older than x days.
+     * @param zipOldLogFilesOlderThanDays zip files older than x days.
+     * @param loggingLevel logging level that corresponds to java.util.logging.Level.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb}") Integer maxStringSizeMb,
@@ -53,7 +55,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${logDeletionCronScheduler}") String logDeletionCronScheduler,
                                       @Value("${applicationName}") String applicationName,
                                       @Value("${compressOldLogs}") boolean compressOldLogs,
-                                      @Value("${zipOldLogFilesOlderThanDays}") Integer zipOldLogFilesOlderThanDays) {
+                                      @Value("${zipOldLogFilesOlderThanDays}") Integer zipOldLogFilesOlderThanDays,
+                                      @Value("${loggingLevel}") String loggingLevel) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
@@ -65,6 +68,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.compressOldLogs = compressOldLogs;
         this.zipOldLogFilesOlderThanDays = zipOldLogFilesOlderThanDays;
         this.zippedLogFilePath = zippedLogFilePath;
+        this.loggingLevel = loggingLevel;
     }
 
     /**
@@ -85,7 +89,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean(name = "loggingDispatcherServlet")
     public DispatcherServlet dispatcherServlet() {
         return new LoggableDispatcherServlet(maxFileSizeMb, maxStringSizeMb, logFilePath,
-                charset, maxCacheHistoryLogs, applicationName);
+                charset, maxCacheHistoryLogs, applicationName, loggingLevel);
     }
 
     /**
