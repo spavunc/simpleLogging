@@ -134,6 +134,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             throws IOException {
 
         String uuid = UUID.randomUUID().toString();
+        Map<String, String> customProperties = CustomLogProperties.getProperties();
 
         Payload log = Payload.builder()
                 .httpMethod(requestToCache.getMethod())
@@ -142,6 +143,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .requestHandler(handler.getHandler().toString())
                 .timestamp(LocalDateTime.now())
                 .uuid(uuid)
+                .customProperties(customProperties)
                 .build();
 
         LOGGER.info(() -> uuid + " HTTP METHOD - " + log.getHttpMethod());
@@ -149,8 +151,6 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         LOGGER.info(() -> uuid + " REQUEST HANDLER - " + log.getRequestHandler());
         LOGGER.info(() -> uuid + " HTTP STATUS - " + log.getHttpStatus());
 
-        // Log custom properties
-        Map<String, String> customProperties = CustomLogProperties.getProperties();
         for (Map.Entry<String, String> entry : customProperties.entrySet()) {
             LOGGER.info(() -> uuid + " " + entry.getKey() + " - " + entry.getValue());
         }

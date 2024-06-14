@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -20,4 +21,5 @@ public class Payload {
     private String responseBody;
     private LocalDateTime timestamp;
     private String uuid;
+    private Map<String, String> customProperties;
 }
