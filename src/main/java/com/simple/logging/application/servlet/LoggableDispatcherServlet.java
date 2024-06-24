@@ -4,6 +4,7 @@ import com.simple.logging.application.annotation.IgnoreLogging;
 import com.simple.logging.application.model.CustomLogProperties;
 import com.simple.logging.application.model.Payload;
 import com.simple.logging.application.utility.Log;
+import com.simple.logging.application.utility.LogUtility;
 import com.simple.logging.application.utility.PayloadHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -135,7 +136,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      * @param log      the payload log object.
      */
-    private void getResponsePayload(HttpServletResponse response, Payload log){
+    private void getResponsePayload(HttpServletResponse response, Payload log) {
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         if (wrapper != null) {
             byte[] byteArray = wrapper.getContentAsByteArray();
@@ -154,16 +155,16 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         if (byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
             String payloadMarker = isPayloadResponse ?
-                    log.getUuid() + " RESPONSE BODY: {0}" :
-                    log.getUuid() + " REQUEST BODY: {0}";
+                    log.getUuid() + " RESPONSE BODY: {}" :
+                    log.getUuid() + " REQUEST BODY: {}";
             if (!jsonStringFromByteArray.isBlank()) {
-                Log.info(payloadMarker, jsonStringFromByteArray);
+                Log.info(payloadMarker, LogUtility.minifyJsonString(jsonStringFromByteArray));
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {
-                log.setResponseBody(jsonStringFromByteArray);
+                log.setResponseBody(LogUtility.minifyJsonString(jsonStringFromByteArray));
             } else {
-                log.setRequestBody(jsonStringFromByteArray);
+                log.setRequestBody(LogUtility.minifyJsonString(jsonStringFromByteArray));
             }
         } else if (byteArray.length > maxStringSizeMb) {
             Log.info("Content too long!");
