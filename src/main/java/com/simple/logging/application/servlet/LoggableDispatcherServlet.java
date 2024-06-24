@@ -136,7 +136,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      * @param log      the payload log object.
      */
-    private void getResponsePayload(HttpServletResponse response, Payload log){
+    private void getResponsePayload(HttpServletResponse response, Payload log) {
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         if (wrapper != null) {
             byte[] byteArray = wrapper.getContentAsByteArray();
