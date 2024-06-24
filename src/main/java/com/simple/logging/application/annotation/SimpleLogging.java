@@ -38,4 +38,6 @@ public @interface SimpleLogging {
 
     boolean logToConsole() default false;
 
+    int maxBackupFiles() default 5;
+
 }

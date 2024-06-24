@@ -18,6 +18,7 @@ public class Log {
     private final String applicationName;
     private final String loggingLevel;
     private final boolean logToConsole;
+    private final Integer maxBackupFiles;
 
     /**
      * Constructs a new Log with specified logging configurations.
@@ -27,17 +28,20 @@ public class Log {
      * @param charset         the character encoding to be used for logging.
      * @param applicationName name of your application.
      * @param logToConsole    save Log.info() to console.
+     * @param maxBackupFiles  maximum number of backup files.
      */
     public Log(Integer maxFileSizeMb, String logFilePath,
                String charset, String applicationName,
                String loggingLevel,
-               boolean logToConsole) {
+               boolean logToConsole,
+               Integer maxBackupFiles) {
         this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
         this.logFilePath = logFilePath;
         this.charset = charset;
         this.applicationName = applicationName;
         this.loggingLevel = loggingLevel;
         this.logToConsole = logToConsole;
+        this.maxBackupFiles = maxBackupFiles;
         setupLogger();
     }
 
@@ -105,7 +109,7 @@ public class Log {
     private void setupLogger() {
         try {
             // Create FileHandler with size limit and rotating file pattern
-            FileHandler fileHandler = new CustomFileHandler(Paths.get(logFilePath), maxFileSizeMb, 5,
+            FileHandler fileHandler = new CustomFileHandler(Paths.get(logFilePath), maxFileSizeMb, maxBackupFiles,
                     Charset.forName(charset), applicationName);
             // Add the FileHandler to the logger.
             LOGGER.addHandler(fileHandler);
