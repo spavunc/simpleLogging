@@ -15,14 +15,11 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * LoggableDispatcherServlet is a custom implementation of Spring's DispatcherServlet that logs
@@ -32,8 +29,6 @@ import java.util.logging.Logger;
  * paths, charset, and cache history.</p>
  */
 public class LoggableDispatcherServlet extends DispatcherServlet {
-    private static final Logger LOGGER = Logger.getLogger(Log.class.getName());
-
     private final Integer maxStringSizeMb;
     private final Integer maxCacheHistoryLogs;
 
@@ -69,7 +64,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
             assert handler != null;
             executeLogDispatch(request, response, handler);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, String.format("Exception occurred - %s", ex.getMessage()), ex);
+            Log.error(String.format("Exception occurred - %s", ex.getMessage()), ex);
         } finally {
             // Clear custom properties after logging
             CustomLogProperties.clear();
@@ -82,11 +77,9 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param requestToCache  the HTTP request to be logged.
      * @param responseToCache the HTTP response to be logged.
      * @param handler         the handler for the request.
-     * @throws IOException if an input or output exception occurs.
      */
     private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache,
-                     HandlerExecutionChain handler)
-            throws IOException {
+                     HandlerExecutionChain handler) {
 
         String uuid = UUID.randomUUID().toString();
         Map<String, String> customProperties = CustomLogProperties.getProperties();
@@ -101,13 +94,13 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 .customProperties(customProperties)
                 .build();
 
-        LOGGER.info(() -> uuid + " HTTP METHOD - " + log.getHttpMethod());
-        LOGGER.info(() -> uuid + " REQUEST URL - " + log.getRequestUrl());
-        LOGGER.info(() -> uuid + " REQUEST HANDLER - " + log.getRequestHandler());
-        LOGGER.info(() -> uuid + " HTTP STATUS - " + log.getHttpStatus());
+        Log.info(uuid + " HTTP METHOD - " + log.getHttpMethod());
+        Log.info(uuid + " REQUEST URL - " + log.getRequestUrl());
+        Log.info(uuid + " REQUEST HANDLER - " + log.getRequestHandler());
+        Log.info(uuid + " HTTP STATUS - " + log.getHttpStatus());
 
         for (Map.Entry<String, String> entry : customProperties.entrySet()) {
-            LOGGER.info(() -> uuid + " " + entry.getKey() + " - " + entry.getValue());
+            Log.info(uuid + " " + entry.getKey() + " - " + entry.getValue());
         }
 
         getRequestPayload(requestToCache, log);
@@ -141,10 +134,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      *
      * @param response the HTTP response.
      * @param log      the payload log object.
-     * @throws IOException if an input or output exception occurs.
      */
-    private void getResponsePayload(HttpServletResponse response, Payload log) throws IOException {
-        updateResponse(response);
+    private void getResponsePayload(HttpServletResponse response, Payload log){
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         if (wrapper != null) {
             byte[] byteArray = wrapper.getContentAsByteArray();
@@ -166,7 +157,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                     log.getUuid() + " RESPONSE BODY: {0}" :
                     log.getUuid() + " REQUEST BODY: {0}";
             if (!jsonStringFromByteArray.isBlank()) {
-                LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
+                Log.info(payloadMarker, jsonStringFromByteArray);
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {
@@ -175,20 +166,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                 log.setRequestBody(jsonStringFromByteArray);
             }
         } else if (byteArray.length > maxStringSizeMb) {
-            LOGGER.info("Content too long!");
+            Log.info("Content too long!");
         }
-    }
-
-    /**
-     * Updates the response by copying the body to the response.
-     *
-     * @param response the HTTP response.
-     * @throws IOException if an input or output exception occurs.
-     */
-    private void updateResponse(HttpServletResponse response) throws IOException {
-        ContentCachingResponseWrapper responseWrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
-        assert responseWrapper != null;
-        responseWrapper.copyBodyToResponse();
     }
 
     /**
@@ -223,7 +202,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         try {
             super.doDispatch(request, response);
         } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, String.format("Exception occurred - %s", ex.getMessage()), ex);
+            Log.error(String.format("Exception occurred - %s", ex.getMessage()), ex);
         } finally {
             if (shouldLogRequest(request)) {
                 log(request, response, handler);

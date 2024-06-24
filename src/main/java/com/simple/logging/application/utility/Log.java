@@ -50,6 +50,33 @@ public class Log {
         }
     }
 
+    public static void info(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            LOGGER.info(message);
+        } else {
+            String formattedMessage = formatMessage(message, args);
+            LOGGER.info(formattedMessage);
+        }
+    }
+
+    public static void error(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            LOGGER.severe(message);
+        } else {
+            String formattedMessage = formatMessage(message, args);
+            LOGGER.severe(formattedMessage);
+        }
+    }
+
+    public static void warn(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            LOGGER.warning(message);
+        } else {
+            String formattedMessage = formatMessage(message, args);
+            LOGGER.warning(formattedMessage);
+        }
+    }
+
     private static String formatMessage(String message, Object... args) {
         // Check if the message contains `%s` for String.format
         if (message.contains("%s")) {

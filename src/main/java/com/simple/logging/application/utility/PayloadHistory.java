@@ -1,7 +1,6 @@
 package com.simple.logging.application.utility;
 
 import com.simple.logging.application.model.Payload;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.List;
  * This class provides synchronized methods to add, remove, clear, and view log entries.
  * </p>
  */
-@Slf4j
 public class PayloadHistory {
 
     private PayloadHistory() {
@@ -37,7 +35,7 @@ public class PayloadHistory {
      */
     public static synchronized void removeLog(Payload logEntry) {
         payloadHistoryList.remove(logEntry);
-        log.info("Removed log entry: {}", logEntry);
+        Log.info("Removed log entry: {}", logEntry);
     }
 
     /**
@@ -45,7 +43,7 @@ public class PayloadHistory {
      */
     public static synchronized void clearLog() {
         payloadHistoryList.clear();
-        log.info("Cleared all log entries from the history.");
+        Log.info("Cleared all log entries from the history.");
     }
 
     /**
