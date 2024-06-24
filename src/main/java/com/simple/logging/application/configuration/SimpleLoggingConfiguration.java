@@ -30,6 +30,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final String zippedLogFilePath;
     private final String loggingLevel;
     private final boolean logToConsole;
+    private final Integer maxBackupFiles;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -46,7 +47,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param compressOldLogs             compress old logs into a ZIP archive.
      * @param zipOldLogFilesOlderThanDays zip files older than x days.
      * @param loggingLevel                logging level that corresponds to java.util.logging.Level.
-     * @param logToConsole               save Log.info() to console.
+     * @param logToConsole                save Log.info() to console.
+     * @param maxBackupFiles              maximum number of backup files.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb}") Integer maxStringSizeMb,
@@ -60,7 +62,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${compressOldLogs}") boolean compressOldLogs,
                                       @Value("${zipOldLogFilesOlderThanDays}") Integer zipOldLogFilesOlderThanDays,
                                       @Value("${loggingLevel}") String loggingLevel,
-                                      @Value("${logToConsole}") boolean logToConsole) {
+                                      @Value("${logToConsole}") boolean logToConsole,
+                                      @Value("${maxBackupFiles}") Integer maxBackupFiles) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
@@ -74,6 +77,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.zippedLogFilePath = zippedLogFilePath;
         this.loggingLevel = loggingLevel;
         this.logToConsole = logToConsole;
+        this.maxBackupFiles = maxBackupFiles;
     }
 
     /**
@@ -104,7 +108,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     @Bean
     public Log log() {
         return new Log(maxFileSizeMb, logFilePath,
-                charset, applicationName, loggingLevel, logToConsole);
+                charset, applicationName, loggingLevel, logToConsole, maxBackupFiles);
     }
 
     /**
