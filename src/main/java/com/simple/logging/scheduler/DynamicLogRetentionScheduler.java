@@ -1,7 +1,7 @@
 package com.simple.logging.scheduler;
 
+import com.simple.logging.application.utility.Log;
 import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 
@@ -19,7 +19,6 @@ import java.util.zip.ZipOutputStream;
 /**
  * Utility class that handles dynamic scheduling of log file deletion based on a retention policy.
  */
-@Slf4j
 public class DynamicLogRetentionScheduler {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private final ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
@@ -46,24 +45,24 @@ public class DynamicLogRetentionScheduler {
      */
     @PostConstruct
     public void scheduleLogDeletion() {
-        log.info("Initializing Task Scheduler...");
+        Log.info("Initializing Task Scheduler...");
         if (logDeletionCronScheduler == null || logDeletionCronScheduler.isBlank()) {
-            log.error("Cron expression for log deletion is empty or not set. Log deletion will not be scheduled.");
+            Log.error("Cron expression for log deletion is empty or not set. Log deletion will not be scheduled.");
             return;
         }
 
         taskScheduler.initialize();
-        log.info("Scheduling log deletion with cron expression: {}", logDeletionCronScheduler);
+        Log.info("Scheduling log deletion with cron expression: {}", logDeletionCronScheduler);
         try {
             taskScheduler.schedule(() -> {
                 try {
                     applyLogRetentionPolicy();
                 } catch (IOException e) {
-                    log.error("Something went wrong when applying log retention policy: {}", logDeletionCronScheduler, e);
+                    Log.error("Something went wrong when applying log retention policy: {}", logDeletionCronScheduler, e);
                 }
             }, new CronTrigger(logDeletionCronScheduler));
         } catch (IllegalArgumentException e) {
-            log.error("Invalid cron expression for log deletion: {}", logDeletionCronScheduler, e);
+            Log.error("Invalid cron expression for log deletion: {}", logDeletionCronScheduler, e);
         }
     }
 
@@ -71,17 +70,17 @@ public class DynamicLogRetentionScheduler {
      * Applies the log retention policy by deleting log files that are older than the configured retention length.
      */
     public void applyLogRetentionPolicy() throws IOException {
-        log.info("Initiating deletion of old log files...");
+        Log.info("Initiating deletion of old log files...");
 
         File logDir = new File(logFilePath);
         if (!logDir.exists() || !logDir.isDirectory()) {
-            log.warn("Log directory does not exist: " + logFilePath);
+            Log.warn("Log directory does not exist: " + logFilePath);
             return;
         }
 
         File[] logFiles = logDir.listFiles((dir, name) -> name.matches(applicationName + "-\\d{4}-\\d{2}-\\d{2}.*"));
         if (logFiles == null || logFiles.length == 0) {
-            log.info("No log files found for deletion.");
+            Log.info("No log files found for deletion.");
             return;
         }
 
@@ -97,13 +96,13 @@ public class DynamicLogRetentionScheduler {
             if (daysBetween >= zipOldLogFilesOlderThanDays && compressOldLogs && compressLogFile(logFile)) {
                 Files.delete(logFile.toPath());
                 logsDeletedCounter++;
-                log.info("Deleted log file: " + logFile.getName());
+                Log.info("Deleted log file: " + logFile.getName());
                 continue;
             }
 
             logsDeletedCounter += deleteOldLogs(daysBetween, logFile);
         }
-        log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
+        Log.info("Deletion of old log files complete. Deleted {} files.", logsDeletedCounter);
     }
 
     /**
@@ -117,10 +116,10 @@ public class DynamicLogRetentionScheduler {
         if (daysBetween > logRetentionLengthInDays) {
             try {
                 Files.delete(logFile.toPath());
-                log.info("Deleted log file: {}", logFile.getName());
+                Log.info("Deleted log file: {}", logFile.getName());
                 logsDeleted++;
             } catch (Exception e) {
-                log.error("Failed to delete log file: {}", logFile.getName(), e);
+                Log.error("Failed to delete log file: {}", logFile.getName(), e);
             }
         }
 
@@ -141,7 +140,7 @@ public class DynamicLogRetentionScheduler {
     private boolean compressLogFile(File logFile) throws IOException {
         if (logFile.getName().endsWith(".zip")) return false;
 
-        log.info("Compressing {}...", logFile.getName());
+        Log.info("Compressing {}...", logFile.getName());
         String zipFileName = zippedLogFilePath + logFile.getName() + ".zip";
         try (FileOutputStream fos = new FileOutputStream(zipFileName); ZipOutputStream zos = new ZipOutputStream(fos); FileInputStream fis = new FileInputStream(logFile)) {
 
@@ -156,7 +155,7 @@ public class DynamicLogRetentionScheduler {
 
             zos.closeEntry();
 
-            log.info("Compression of {} complete.", logFile.getName());
+            Log.info("Compression of {} complete.", logFile.getName());
         }
 
         return true;

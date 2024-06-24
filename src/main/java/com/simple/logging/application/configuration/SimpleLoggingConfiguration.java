@@ -1,6 +1,7 @@
 package com.simple.logging.application.configuration;
 
 import com.simple.logging.application.servlet.LoggableDispatcherServlet;
+import com.simple.logging.application.utility.Log;
 import com.simple.logging.scheduler.DynamicLogRetentionScheduler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
@@ -28,6 +29,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final Integer zipOldLogFilesOlderThanDays;
     private final String zippedLogFilePath;
     private final String loggingLevel;
+    private final boolean logToConsole;
 
     /**
      * Constructs a new SimpleLoggingConfiguration with specified logging configurations.
@@ -43,7 +45,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      * @param applicationName             name of your application.
      * @param compressOldLogs             compress old logs into a ZIP archive.
      * @param zipOldLogFilesOlderThanDays zip files older than x days.
-     * @param loggingLevel logging level that corresponds to java.util.logging.Level.
+     * @param loggingLevel                logging level that corresponds to java.util.logging.Level.
+     * @param logToConsole               save Log.info() to console.
      */
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb}") Integer maxStringSizeMb,
@@ -56,7 +59,8 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
                                       @Value("${applicationName}") String applicationName,
                                       @Value("${compressOldLogs}") boolean compressOldLogs,
                                       @Value("${zipOldLogFilesOlderThanDays}") Integer zipOldLogFilesOlderThanDays,
-                                      @Value("${loggingLevel}") String loggingLevel) {
+                                      @Value("${loggingLevel}") String loggingLevel,
+                                      @Value("${logToConsole}") boolean logToConsole) {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
@@ -69,6 +73,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.zipOldLogFilesOlderThanDays = zipOldLogFilesOlderThanDays;
         this.zippedLogFilePath = zippedLogFilePath;
         this.loggingLevel = loggingLevel;
+        this.logToConsole = logToConsole;
     }
 
     /**
@@ -88,8 +93,18 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      */
     @Bean(name = "loggingDispatcherServlet")
     public DispatcherServlet dispatcherServlet() {
-        return new LoggableDispatcherServlet(maxFileSizeMb, maxStringSizeMb, logFilePath,
-                charset, maxCacheHistoryLogs, applicationName, loggingLevel);
+        return new LoggableDispatcherServlet(maxStringSizeMb, maxCacheHistoryLogs);
+    }
+
+    /**
+     * Creates and configures a new instance of Log.
+     *
+     * @return the configured Log instance.
+     */
+    @Bean
+    public Log log() {
+        return new Log(maxFileSizeMb, logFilePath,
+                charset, applicationName, loggingLevel, logToConsole);
     }
 
     /**

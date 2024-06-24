@@ -1,7 +1,5 @@
 package com.simple.logging.application.configuration;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -13,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.LogRecord;
 
-@Slf4j
 public class CustomFileHandler extends FileHandler {
 
     private static final String FILE_EXTENSION = ".log";

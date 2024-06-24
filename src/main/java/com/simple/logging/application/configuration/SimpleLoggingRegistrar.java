@@ -37,6 +37,7 @@ public class SimpleLoggingRegistrar implements ImportBeanDefinitionRegistrar {
         builder.addConstructorArgValue(attributes.getBoolean("compressOldLogs"));
         builder.addConstructorArgValue(attributes.getNumber("zipOldLogFilesOlderThanDays"));
         builder.addConstructorArgValue(attributes.getString("loggingLevel"));
+        builder.addConstructorArgValue(attributes.getBoolean("logToConsole"));
         registry.registerBeanDefinition("simpleLoggerConfiguration", builder.getBeanDefinition());
     }
 }

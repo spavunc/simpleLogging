@@ -3,7 +3,6 @@ package com.simple.logging.application.utility;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-@Slf4j
 public class LogUtility {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -58,9 +56,9 @@ public class LogUtility {
     public static synchronized void moveFile(Path sourcePath, Path targetPath) {
         try {
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("Moved file from {} to {}", sourcePath, targetPath);
+            Log.info("Moved file from {} to {}", sourcePath, targetPath);
         } catch (IOException e) {
-            log.error("Failed to move file from {} to {}", sourcePath, targetPath, e);
+            Log.error("Failed to move file from {} to {}", sourcePath, targetPath, e);
         }
     }
 
@@ -74,9 +72,9 @@ public class LogUtility {
         Path targetPath = sourcePath.resolveSibling(newName);
         try {
             Files.move(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("Renamed file from {} to {}", sourcePath, targetPath);
+            Log.info("Renamed file from {} to {}", sourcePath, targetPath);
         } catch (IOException e) {
-            log.error("Failed to rename file from {} to {}", sourcePath, targetPath, e);
+            Log.error("Failed to rename file from {} to {}", sourcePath, targetPath, e);
         }
     }
 
@@ -88,9 +86,9 @@ public class LogUtility {
     public static synchronized void deleteFile(Path filePath) {
         try {
             Files.delete(filePath);
-            log.info("Deleted file: {}", filePath);
+            Log.info("Deleted file: {}", filePath);
         } catch (IOException e) {
-            log.error("Failed to delete file: {}", filePath, e);
+            Log.error("Failed to delete file: {}", filePath, e);
         }
     }
 
@@ -121,9 +119,9 @@ public class LogUtility {
             }
 
             zos.closeEntry();
-            log.info("Compressed file {} to {}", filePath, zipFileName);
+            Log.info("Compressed file {} to {}", filePath, zipFileName);
         } catch (IOException e) {
-            log.error("Failed to compress file: {}", filePath, e);
+            Log.error("Failed to compress file: {}", filePath, e);
         }
     }
 
@@ -136,20 +134,20 @@ public class LogUtility {
         File logDir = new File(UtilityObjects.logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
-            log.warn("Log directory does not exist: " + UtilityObjects.logFilePath);
+            Log.warn("Log directory does not exist: " + UtilityObjects.logFilePath);
             return new ArrayList<>();
         }
 
         try {
             File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
             if (logFiles != null) {
-                log.info("Retrieved {} log files from {}", logFiles.length, logDir);
+                Log.info("Retrieved {} log files from {}", logFiles.length, logDir);
                 return List.of(logFiles);
             } else {
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Failed to retrieve log files from {}", logDir, e);
+            Log.error("Failed to retrieve log files from {}", logDir, e);
         }
         return new ArrayList<>();
     }
@@ -166,7 +164,7 @@ public class LogUtility {
         File logDir = new File(UtilityObjects.logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
-            log.warn("Log directory does not exist: " + UtilityObjects.logFilePath);
+            Log.warn("Log directory does not exist: " + UtilityObjects.logFilePath);
             return filteredLogFiles;
         }
 
@@ -175,14 +173,14 @@ public class LogUtility {
                 File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
                 if (logFiles != null) {
                     findLogsBetweenDates(startDate, endDate, logFiles, filteredLogFiles);
-                    log.info("Retrieved {} log files from {} between {} and {}", filteredLogFiles.size(), logDir, startDate, endDate);
+                    Log.info("Retrieved {} log files from {} between {} and {}", filteredLogFiles.size(), logDir, startDate, endDate);
                 }
                 return filteredLogFiles;
             } catch (Exception e) {
-                log.error("Failed to retrieve log files from {} between {} and {}", logDir, startDate, endDate, e);
+                Log.error("Failed to retrieve log files from {} between {} and {}", logDir, startDate, endDate, e);
             }
         } else {
-            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
+            Log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
         }
         return filteredLogFiles;
     }
@@ -214,7 +212,7 @@ public class LogUtility {
         File logDir = new File(UtilityObjects.logFilePath);
 
         if (!logDir.exists() || !logDir.isDirectory()) {
-            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
+            Log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
             return filteredLogFiles;
         }
 
@@ -223,14 +221,14 @@ public class LogUtility {
                 File[] logFiles = logDir.listFiles((dir, name) -> name.matches(UtilityObjects.applicationName + FILE_NAME_REGEX));
                 if (logFiles != null) {
                     findLogsForSpecificDate(date, logFiles, filteredLogFiles);
-                    log.info("Retrieved {} log files from {} for date {}", filteredLogFiles.size(), logDir, date);
+                    Log.info("Retrieved {} log files from {} for date {}", filteredLogFiles.size(), logDir, date);
                 }
                 return filteredLogFiles;
             } catch (Exception e) {
-                log.error("Failed to retrieve log files from {} for date {}", logDir, date, e);
+                Log.error("Failed to retrieve log files from {} for date {}", logDir, date, e);
             }
         } else {
-            log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
+            Log.warn(DIRECTORY_NOT_EXIST, UtilityObjects.logFilePath);
         }
         return filteredLogFiles;
     }
@@ -274,7 +272,7 @@ public class LogUtility {
                 }
             }
         } catch (IOException e) {
-            log.error("Failed to read log file: {}", filePath, e);
+            Log.error("Failed to read log file: {}", filePath, e);
         }
         return matchedLines;
     }
@@ -294,7 +292,7 @@ public class LogUtility {
                 writer.newLine();
             }
         } catch (IOException e) {
-            log.error("Failed to write to file: {}", filePath, e);
+            Log.error("Failed to write to file: {}", filePath, e);
         }
     }
 }
