@@ -33,6 +33,9 @@ public @interface SimpleLogging {
     String applicationName() default "application";
 
     boolean compressOldLogs() default true;
+
     String loggingLevel() default "ALL";
+
+    boolean logToConsole() default false;
 
 }

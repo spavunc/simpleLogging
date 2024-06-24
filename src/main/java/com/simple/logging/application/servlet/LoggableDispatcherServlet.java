@@ -1,9 +1,9 @@
 package com.simple.logging.application.servlet;
 
-import com.simple.logging.application.configuration.CustomFileHandler;
 import com.simple.logging.application.annotation.IgnoreLogging;
 import com.simple.logging.application.model.CustomLogProperties;
 import com.simple.logging.application.model.Payload;
+import com.simple.logging.application.utility.Log;
 import com.simple.logging.application.utility.PayloadHistory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,14 +16,11 @@ import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,62 +32,20 @@ import java.util.logging.Logger;
  * paths, charset, and cache history.</p>
  */
 public class LoggableDispatcherServlet extends DispatcherServlet {
+    private static final Logger LOGGER = Logger.getLogger(Log.class.getName());
 
-    private static final Logger LOGGER = Logger.getLogger(LoggableDispatcherServlet.class.getName());
     private final Integer maxStringSizeMb;
-    private final Integer maxFileSizeMb;
-    private final String logFilePath;
-    private final String charset;
     private final Integer maxCacheHistoryLogs;
-    private final String applicationName;
-    private final String loggingLevel;
 
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
      *
-     * @param maxFileSizeMb            the maximum size of the log file in megabytes.
-     * @param maxStringSizeMb          the maximum size of the request/response body to be logged in megabytes.
-     * @param logFilePath              the directory path where log files will be stored.
-     * @param charset                  the character encoding to be used for logging.
-     * @param maxCacheHistoryLogs      the maximum number of logs to be cached in memory.
-     * @param applicationName          name of your application.
+     * @param maxStringSizeMb     the maximum size of the request/response body to be logged in megabytes.
+     * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
      */
-    public LoggableDispatcherServlet(Integer maxFileSizeMb, Integer maxStringSizeMb, String logFilePath,
-                                     String charset, Integer maxCacheHistoryLogs, String applicationName,
-                                     String loggingLevel) {
-        this.maxFileSizeMb = maxFileSizeMb * 1024 * 1024; // Convert MB to bytes
+    public LoggableDispatcherServlet(Integer maxStringSizeMb, Integer maxCacheHistoryLogs) {
         this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;
-        this.logFilePath = logFilePath;
-        this.charset = charset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
-        this.applicationName = applicationName;
-        this.loggingLevel = loggingLevel;
-        setupLogger();
-    }
-
-    /**
-     * Sets up the logger with a FileHandler for logging to a file.
-     */
-    private void setupLogger() {
-        try {
-            // Create FileHandler with size limit and rotating file pattern
-            FileHandler fileHandler = new CustomFileHandler(Paths.get(logFilePath), maxFileSizeMb, 5,
-                                                            Charset.forName(charset), applicationName);
-            // Add the FileHandler to the logger.
-            LOGGER.addHandler(fileHandler);
-            setLoggingLevel();
-            LOGGER.setUseParentHandlers(false);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Failed to set up file logging", e);
-        }
-    }
-
-    private void setLoggingLevel() {
-        try {
-            LOGGER.setLevel(Level.parse(loggingLevel));
-        } catch (Exception ex) {
-            LOGGER.log(Level.WARNING, "Invalid logging level, logging level will be set to ALL");
-        }
     }
 
     /**
@@ -101,7 +56,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      */
     @Override
     protected void doDispatch(@NotNull HttpServletRequest request,
-        @NotNull HttpServletResponse response) {
+                              @NotNull HttpServletResponse response) {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -130,7 +85,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @throws IOException if an input or output exception occurs.
      */
     private void log(HttpServletRequest requestToCache, HttpServletResponse responseToCache,
-        HandlerExecutionChain handler)
+                     HandlerExecutionChain handler)
             throws IOException {
 
         String uuid = UUID.randomUUID().toString();
@@ -208,8 +163,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         if (byteArray.length < maxStringSizeMb) {
             String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
             String payloadMarker = isPayloadResponse ?
-                log.getUuid() + " RESPONSE BODY: {0}" :
-                log.getUuid() + " REQUEST BODY: {0}";
+                    log.getUuid() + " RESPONSE BODY: {0}" :
+                    log.getUuid() + " REQUEST BODY: {0}";
             if (!jsonStringFromByteArray.isBlank()) {
                 LOGGER.log(Level.INFO, payloadMarker, jsonStringFromByteArray);
             }
