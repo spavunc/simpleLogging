@@ -295,4 +295,44 @@ public class LogUtility {
             Log.error("Failed to write to file: {}", filePath, e);
         }
     }
+
+    /**
+     * Minifies a JSON string by removing unnecessary whitespaces and line breaks.
+     *
+     * @param jsonString the JSON string to minify
+     * @return a compact JSON string
+     */
+    public static String minifyJsonString(String jsonString) {
+        if (jsonString == null || jsonString.isEmpty()) {
+            return jsonString;
+        }
+
+        // Use a StringBuilder to build the compact JSON
+        StringBuilder minifiedJson = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (char c : jsonString.toCharArray()) {
+            switch (c) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    if (inQuotes) {
+                        minifiedJson.append(c);
+                    }
+                    break;
+                case '"':
+                    minifiedJson.append(c);
+                    if (c == '"' && (minifiedJson.length() == 1 || jsonString.charAt(minifiedJson.length() - 2) != '\\')) {
+                        inQuotes = !inQuotes;
+                    }
+                    break;
+                default:
+                    minifiedJson.append(c);
+                    break;
+            }
+        }
+
+        return minifiedJson.toString();
+    }
 }
