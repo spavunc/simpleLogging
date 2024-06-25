@@ -313,23 +313,19 @@ public class LogUtility {
 
         for (char c : jsonString.toCharArray()) {
             switch (c) {
-                case ' ':
-                case '\n':
-                case '\r':
-                case '\t':
+                case ' ', '\n', '\r', '\t' -> {
                     if (inQuotes) {
                         minifiedJson.append(c);
                     }
-                    break;
-                case '"':
+                }
+                case '"' -> {
                     minifiedJson.append(c);
-                    if (c == '"' && (minifiedJson.length() == 1 || jsonString.charAt(minifiedJson.length() - 2) != '\\')) {
+                    if (minifiedJson.length() == 1 || jsonString.charAt(
+                        minifiedJson.length() - 2) != '\\') {
                         inQuotes = !inQuotes;
                     }
-                    break;
-                default:
-                    minifiedJson.append(c);
-                    break;
+                }
+                default -> minifiedJson.append(c);
             }
         }
 
