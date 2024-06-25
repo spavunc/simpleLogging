@@ -53,7 +53,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     public SimpleLoggingConfiguration(@Value("${maxFileSizeMb}") Integer maxFileSizeMb,
                                       @Value("${maxStringSizeMb}") Integer maxStringSizeMb,
                                       @Value("${logFilePath}") String logFilePath,
-                                      @Value("${logFilePath}") String zippedLogFilePath,
+                                      @Value("${zippedLogFilePath}") String zippedLogFilePath,
                                       @Value("${charset}") String charset,
                                       @Value("${maxCacheHistoryLogs}") Integer maxCacheHistoryLogs,
                                       @Value("${logRetentionLengthInDays}") Integer logRetentionLengthInDays,
