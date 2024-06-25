@@ -266,9 +266,11 @@ public class LogUtility {
 
         try (BufferedReader reader = Files.newBufferedReader(filePath)) {
             String line;
+            long lineNumber = 0;
             while ((line = reader.readLine()) != null) {
+                lineNumber++;
                 if (line.contains(keyword)) {
-                    matchedLines.add(line);
+                    matchedLines.add("[File]: " + filePath.getFileName() + "\n[Line No.]: " + lineNumber + "\n" + line + "\n\n");
                 }
             }
         } catch (IOException e) {
