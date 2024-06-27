@@ -232,7 +232,7 @@ List<Payload> logEntries = PayloadHistory.viewLogs();
 
 #### Please note this log history object is being saved in memory - meaning unless you save it and re-instantiate it at startup, it will be cleared once the application shuts down.
 
-###  Log utility
+###  Log implementation
 #### Re-implementation of a standard Java logger, just encapsulated so it's easier to use, also without the need of instantiation
 ```
 Log.log("Basic level of logging");
