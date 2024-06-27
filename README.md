@@ -9,7 +9,7 @@ For this plugin to work in your project, it requires the following:
 MASTER branch will always be the stable release branch.
 Use DEVELOP branch at your own risk!
 
-Master:
+### Master:
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
