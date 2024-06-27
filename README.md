@@ -6,7 +6,7 @@ For this plugin to work in your project, it requires the following:
 * Spring Boot 3.1.4 or higher
 
 ## Releases
-![Stable Release](https://img.shields.io/badge/release-stable-brightgreen) on master branch
+![Stable Release](https:www.google.com/) on master branch
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
