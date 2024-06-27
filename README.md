@@ -73,10 +73,10 @@ These values can be set in the main class as parameters of @SimpleLogging annota
 ```
 @SpringBootApplication
 @SimpleLogging(logToConsole = true, maxBackupFiles = 20, compressOldLogs = false)
-public class MovieFantasyApplication {
+public class ExampleApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MovieFantasyApplication.class, args);
+        SpringApplication.run(ExampleApplication.class, args);
     }
 
 }
