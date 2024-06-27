@@ -232,3 +232,15 @@ List<Payload> logEntries = PayloadHistory.viewLogs();
 
 #### Please note this log history object is being saved in memory - meaning unless you save it and re-instantiate it at startup, it will be cleared once the application shuts down.
 
+###  Log utility
+#### Re-implementation of a standard Java logger, just encapsulated so it's easier to use, also without the need of instantiation
+```
+Log.log("Basic level of logging");
+Log.info("Info level of logging with parameters: {} {}", arg1, arg2 ...);
+Log.warn("This is a warning message");
+Log.error("An error occurred: %s", "you may also use %s as a placeholder for parameters");
+```
+
+All of these may contain endless amount of arguments, and you may use placeholders '%s' and '{}' in any of them.
+
+### All of these utility methods are static, so you don't need to instantiate anything!
