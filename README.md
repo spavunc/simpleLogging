@@ -230,6 +230,24 @@ PayloadHistory.clearLog();
 List<Payload> logEntries = PayloadHistory.viewLogs();
 ```
 
+#### Payload object
+```
+public class Payload {
+    private String httpMethod;
+    private String requestUrl;
+    private String requestHandler;
+    private Integer httpStatus;
+    private String requestBody;
+    private String responseBody;
+    private LocalDateTime timestamp;
+    private String uuid;
+    private Map<String, String> customProperties;
+}
+```
+This object represents the logged payload, and can be used to manipulate it using PayloadHistory methods.
+Each payload logged is being automatically saved to this list, so for basic usage, just use 'viewLogs()' function to view them without any hassle.
+There are options to add new logs, this was added in case user wishes to log something extra not being logged automatically.
+
 #### Please note this log history object is being saved in memory - meaning unless you save it and re-instantiate it at startup, it will be cleared once the application shuts down.
 
 ###  Log implementation
