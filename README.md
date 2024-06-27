@@ -5,6 +5,12 @@ For this plugin to work in your project, it requires the following:
 * Java 17 or higher
 * Spring Boot 3.1.4 or higher
 
+## Releases
+![Stable Release](https://img.shields.io/badge/release-stable-brightgreen)(https://github.com/spavunc/simpleLogging)
+![Dev Release](https://img.shields.io/badge/release-dev-yellow)(https://github.com/spavunc/simpleLogging)
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 ## Getting started
 
 In order to set up basic logging with all default values in your application, you need to annotate your main method with the SimpleLogging annotation.
