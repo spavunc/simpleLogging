@@ -69,6 +69,19 @@ public @interface SimpleLogging {
 }
 ```
 
+These values can be set in the main class as parameters of @SimpleLogging annotation, like following:
+```
+@SpringBootApplication
+@SimpleLogging(logToConsole = true, maxBackupFiles = 20, compressOldLogs = false)
+public class MovieFantasyApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MovieFantasyApplication.class, args);
+    }
+
+}
+```
+
 If you want to include a custom property while logging, you can define it like this:
 ```
 import com.simple.logging.application.model.CustomLogProperties;
@@ -96,12 +109,126 @@ This way, everything logged during the flow of the method your custom property w
 2024-06-25 15:00:48 INFO: 9c2bb054-ea33-4219-9b80-9c4bd71bb3e2 REQUEST BODY: {"eligible":true,"sortField":"TITLE","direction":"ASC"}
 2024-06-25 15:00:48 INFO: 9c2bb054-ea33-4219-9b80-9c4bd71bb3e2 RESPONSE BODY: []
 ```
-You are also free to use our log implementation in your entire application so that all your custom logs use the same logic as the automatic ones.
-```
-import com.simple.logging.application.utility.Log;
 
-...
-Log.info("some example log");
-...
+## Log Utility Features
 
+### Log Utility
+
+The `LogUtility` class provides various methods for handling log files.
+
+#### Features:
+- **Move File**: Moves a file to a new location.
+- **Rename File**: Renames a file.
+- **Delete File**: Deletes a file.
+- **Compress File**: Compresses a log file into a ZIP archive.
+- **Retrieve All Log Files**: Retrieves a list of all log files in the specified directory.
+- **Retrieve Log Files Between Dates**: Retrieves a list of log files between specified dates.
+- **Retrieve Log Files For Date**: Retrieves a list of log files for a specified date.
+- **Search Log File**: Searches for a keyword in a log file and returns matching lines.
+- **Generate File From Search**: Generates a file with the specified name and writes the provided list of strings to it.
+- **Minify JSON String**: Minifies a JSON string by removing unnecessary whitespaces and line breaks.
+
+### Payload History
+
+The `PayloadHistory` class provides methods for managing a history of `Payload` objects.
+
+#### Features:
+- **Add Log**: Adds a log entry to the history.
+- **Remove Log**: Removes a log entry from the history.
+- **Clear Log**: Clears all log entries from the history.
+- **View Logs**: Returns the list of log entries in the history.
+
+## Usage
+
+### Log Utility
+
+#### Retrieve All Log Files
 ```
+List<File> logFiles = LogUtility.getAllLogFiles();
+```
+
+#### Retrieve Log Files Between Dates
+```
+LocalDate startDate = LocalDate.of(2023, 1, 1);
+LocalDate endDate = LocalDate.of(2023, 12, 31);
+List<File> logFiles = LogUtility.getLogFilesBetweenDates(startDate, endDate);
+```
+
+#### Retrieve Log Files For Date
+```
+LocalDate date = LocalDate.of(2023, 6, 1);
+List<File> logFiles = LogUtility.getLogFilesForDate(date);
+```
+
+#### Move a File
+```
+Path sourcePath = Path.of("/path/to/source/file.log");
+Path targetPath = Path.of("/path/to/target/file.log");
+LogUtility.moveFile(sourcePath, targetPath);
+```
+
+#### Rename a File
+```
+Path sourcePath = Path.of("/path/to/source/file.log");
+String newName = "newFileName.log";
+LogUtility.renameFile(sourcePath, newName);
+```
+
+#### Delete a File
+```
+Path filePath = Path.of("/path/to/file.log");
+LogUtility.deleteFile(filePath);
+```
+
+#### Compress a File
+```
+Path filePath = Path.of("/path/to/file.log");
+LogUtility.zipFile(filePath);
+```
+
+#### Search Through a Log File
+```
+Path filePath = Path.of("/path/to/file.log");
+String keyword = "searchKeyword";
+List<String> matchedLines = LogUtility.searchLogFile(filePath, keyword); // These lines also contain the origin file name and the line number
+```
+
+#### Generate File From Search
+```
+String fileName = "searchResults";
+List<String> lines = matchedLines; // Lines obtained from the search
+LogUtility.generateFileFromSearch(fileName, lines);
+```
+
+#### Minify JSON String
+```
+String jsonString = "{ \"key\": \"value\" }";
+String minifiedJson = LogUtility.minifyJsonString(jsonString);
+```
+
+### Payload History
+
+#### Add Log
+```
+Payload logEntry = new Payload();
+PayloadHistory.addLog(logEntry);
+```
+
+#### Remove Log
+```
+Payload logEntry = new Payload();
+PayloadHistory.removeLog(logEntry);
+```
+
+#### Clear Log History
+```
+PayloadHistory.clearLog();
+```
+
+#### View All Log History
+```
+List<Payload> logEntries = PayloadHistory.viewLogs();
+```
+
+#### Please note this log history object is being saved in memory - meaning unless you save it and re-instantiate it at startup, it will be cleared once the application shuts down.
+
