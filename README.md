@@ -6,7 +6,10 @@ For this plugin to work in your project, it requires the following:
 * Spring Boot 3.1.4 or higher
 
 ## Releases
-![Stable Release](https:www.google.com/) on master branch
+MASTER branch will always be the stable release branch.
+Use DEVELOP branch at your own risk!
+
+Master:
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
