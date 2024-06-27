@@ -4,6 +4,14 @@ Welcome to Simple Logger, a Spring Boot plugin that will set up logging in your 
 For this plugin to work in your project, it requires the following:
 * Java 17 or higher
 * Spring Boot 3.1.4 or higher
+To use it in your project, import a maven dependency of the last stable release.
+```
+<dependency>
+  <groupId>com.simple</groupId>
+  <artifactId>logging</artifactId>
+  <version>0.0.3</version>
+</dependency>
+```
 
 ## Releases
 MASTER branch will always be the stable release branch. <br />
