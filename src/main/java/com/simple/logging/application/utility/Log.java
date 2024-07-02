@@ -9,6 +9,9 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A utility class for setting up and managing application logging.
+ */
 public class Log {
     private static final Logger LOGGER = Logger.getLogger(Log.class.getName());
 
@@ -45,6 +48,13 @@ public class Log {
         setupLogger();
     }
 
+    /**
+     * Logs a message at the specified level.
+     *
+     * @param level   the logging level.
+     * @param message the message to log.
+     * @param args    optional arguments for the message.
+     */
     public static void log(Level level, String message, Object... args) {
         if (args == null || args.length == 0) {
             LOGGER.log(level, message);
@@ -54,6 +64,12 @@ public class Log {
         }
     }
 
+    /**
+     * Logs an info message.
+     *
+     * @param message the message to log.
+     * @param args    optional arguments for the message.
+     */
     public static void info(String message, Object... args) {
         if (args == null || args.length == 0) {
             LOGGER.info(message);
@@ -63,6 +79,12 @@ public class Log {
         }
     }
 
+    /**
+     * Logs an error message.
+     *
+     * @param message the message to log.
+     * @param args    optional arguments for the message.
+     */
     public static void error(String message, Object... args) {
         if (args == null || args.length == 0) {
             LOGGER.severe(message);
@@ -72,6 +94,12 @@ public class Log {
         }
     }
 
+    /**
+     * Logs a warning message.
+     *
+     * @param message the message to log.
+     * @param args    optional arguments for the message.
+     */
     public static void warn(String message, Object... args) {
         if (args == null || args.length == 0) {
             LOGGER.warning(message);
@@ -81,6 +109,28 @@ public class Log {
         }
     }
 
+    /**
+     * Logs a debug message.
+     *
+     * @param message the message to log.
+     * @param args    optional arguments for the message.
+     */
+    public static void debug(String message, Object... args) {
+        if (args == null || args.length == 0) {
+            LOGGER.fine(message);
+        } else {
+            String formattedMessage = formatMessage(message, args);
+            LOGGER.fine(formattedMessage);
+        }
+    }
+
+    /**
+     * Formats a message with optional arguments.
+     *
+     * @param message the message to format.
+     * @param args    the arguments to format the message with.
+     * @return the formatted message.
+     */
     private static String formatMessage(String message, Object... args) {
         // Check if the message contains `%s` for String.format
         if (message.contains("%s")) {
@@ -95,6 +145,9 @@ public class Log {
         return formattedMessage;
     }
 
+    /**
+     * Sets the logging level of the logger.
+     */
     private void setLoggingLevel() {
         try {
             LOGGER.setLevel(Level.parse(loggingLevel));

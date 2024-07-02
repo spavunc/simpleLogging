@@ -1,13 +1,18 @@
+import com.simple.logging.LoggingApplication;
 import com.simple.logging.application.utility.LogUtility;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest(classes = {LoggingApplication.class})
 class LogUtilityTest {
 
     @TempDir
@@ -15,7 +20,6 @@ class LogUtilityTest {
 
     @BeforeEach
     void setUp() {
-        // Set up UtilityObjects before each test
         LogUtility.UtilityObjects.setObjects(tempDir.toString(), "testApp");
     }
 
@@ -109,6 +113,14 @@ class LogUtilityTest {
     }
 
     @Test
+    void testSearchLogFileFailure() throws IOException {
+        Path logFile = Files.createFile(tempDir.resolve("searchTest.zip"));
+        Files.write(logFile, List.of("this is a test line", "another test line", "no match here"));
+
+        assertThrows(IllegalArgumentException.class, () -> LogUtility.searchLogFile(logFile, "test"));
+    }
+
+    @Test
     void testGenerateFileFromSearch() throws IOException {
         String fileName = "generatedFile";
         List<String> lines = List.of("line1", "line2", "line3");
@@ -120,5 +132,46 @@ class LogUtilityTest {
 
         List<String> fileContent = Files.readAllLines(generatedFile);
         assertEquals(lines, fileContent);
+    }
+
+    @Test
+    void testExtractDatePartFailure() {
+        String applicationName = "MyApp";
+        LogUtility.UtilityObjects.setObjects("/logs", applicationName);
+
+        String fileName = "MyApp.log";
+
+        assertThrows(StringIndexOutOfBoundsException.class, () -> LogUtility.extractDatePart(fileName));
+    }
+
+    @Test
+    void testExtractDatePartSuccess() {
+        String applicationName = "MyApp";
+        LogUtility.UtilityObjects.setObjects("/logs", applicationName);
+
+        String fileName = "MyApp-2024-06-11.log";
+
+        assertEquals("2024-06-11", LogUtility.extractDatePart(fileName));
+    }
+
+    @Test
+    void testFindLogsForSpecificDateFailure() {
+        // Setup test data
+        LocalDate specificDate = LocalDate.of(2024, 7, 2);
+        File[] logFiles = {
+                new File("testApp-2024-07-02.log"),
+                new File("testApp-2024-07-03.log"),  // This file should be filtered out
+                new File("testApp-2024-07-02-Error.log"),
+        };
+        List<File> filteredLogFiles = new ArrayList<>();
+
+        LogUtility.findLogsForSpecificDate(specificDate, logFiles, filteredLogFiles);
+
+        List<File> expectedFiles = List.of(
+                new File("testApp-2024-07-02.log"),
+                new File("testApp-2024-07-02-Error.log")
+        );
+
+        assertEquals(expectedFiles, filteredLogFiles);
     }
 }

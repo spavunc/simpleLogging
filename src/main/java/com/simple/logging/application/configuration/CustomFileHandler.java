@@ -31,6 +31,11 @@ public class CustomFileHandler extends FileHandler {
         configureHandler();
     }
 
+    /**
+     * Configures the file handler.
+     *
+     * @throws IOException if an I/O error occurs
+     */
     private void configureHandler() throws IOException {
         setEncoding(charset.toString());
         setFormatter(new CustomLogFormatter());
@@ -41,6 +46,13 @@ public class CustomFileHandler extends FileHandler {
         setOutputStream(Files.newOutputStream(currentLogFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND));
     }
 
+    /**
+     * Get the latest log file or create a new one if it doesn't exist.
+     *
+     * @param logsPath the path to the directory containing the log files
+     * @return the path to the latest log file
+     * @throws IOException if an I/O error occurs
+     */
     private Path getLatestLogFile(Path logsPath) throws IOException {
         String dateTime = LocalDate.now().format(dtf);
         String logFileNamePrefix = applicationName + "-" + dateTime;
@@ -62,6 +74,13 @@ public class CustomFileHandler extends FileHandler {
         return currentLogFile;
     }
 
+    /**
+     * Rotate log files by shifting them to the next index, deleting the oldest file if necessary.
+     *
+     * @param  logsPath           the path to the directory containing the log files
+     * @param  logFileNamePrefix  the prefix of the log file names
+     * @throws IOException        if an I/O error occurs
+     */
     private void rotateLogFiles(Path logsPath, String logFileNamePrefix) throws IOException {
         for (int i = maxBackupFiles - 1; i >= 0; i--) {
             Path oldFile = logsPath.resolve(logFileNamePrefix + "-" + i + FILE_EXTENSION);

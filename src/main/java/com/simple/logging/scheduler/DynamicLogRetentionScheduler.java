@@ -137,7 +137,7 @@ public class DynamicLogRetentionScheduler {
      * @param logFile the log file to be compressed
      * @throws IOException if an I/O error occurs during the compression process
      */
-    private boolean compressLogFile(File logFile) throws IOException {
+    public boolean compressLogFile(File logFile) throws IOException {
         if (logFile.getName().endsWith(".zip")) return false;
 
         Log.info("Compressing {}...", logFile.getName());

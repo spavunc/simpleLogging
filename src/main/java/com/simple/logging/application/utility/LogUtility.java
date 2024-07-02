@@ -100,7 +100,7 @@ public class LogUtility {
      */
     public static synchronized void zipFile(Path filePath) {
         // Ensure only .log files are processed
-        if (!filePath.endsWith(".log")) {
+        if (!filePath.getFileName().toString().endsWith(".log")) {
             throw new IllegalArgumentException("Only .log files can be compressed");
         }
 
@@ -233,20 +233,38 @@ public class LogUtility {
         return filteredLogFiles;
     }
 
-    private static void findLogsForSpecificDate(LocalDate date, File[] logFiles, List<File> filteredLogFiles) {
+    /**
+     * Find logs for a specific date in the given list of log files.
+     *
+     * @param  date              the specific date to search for
+     * @param  logFiles          the array of log files to search through
+     * @param  filteredLogFiles  the list to store filtered log files for the specific date
+     */
+    public static void findLogsForSpecificDate(LocalDate date, File[] logFiles, List<File> filteredLogFiles) {
         for (File logFile : logFiles) {
             if (!logFile.getName().endsWith(".log"))
                 continue;
-            // Extract the date part from filename correctly
-            String datePart = logFile.getName().substring(
-                    UtilityObjects.applicationName.length() + 1,
-                    UtilityObjects.applicationName.length() + 11
-            );
+
+            String datePart = extractDatePart(logFile.getName());
             LocalDate fileDate = LocalDate.parse(datePart, DATE_FORMATTER);
             if (fileDate.isEqual(date)) {
                 filteredLogFiles.add(logFile);
             }
         }
+    }
+
+    /**
+     * Extracts the date part from a log file name.
+     *
+     * @param fileName the name of the file from which to extract the date part
+     * @return the date part of the file name in the format "yyyy-MM-dd"
+     * @throws StringIndexOutOfBoundsException if the file name is not long enough to contain the expected date part
+     */
+    public static String extractDatePart(String fileName) throws StringIndexOutOfBoundsException {
+        return fileName.substring(
+                UtilityObjects.applicationName.length() + 1,
+                UtilityObjects.applicationName.length() + 11
+        );
     }
 
     /**
@@ -309,7 +327,6 @@ public class LogUtility {
             return jsonString;
         }
 
-        // Use a StringBuilder to build the compact JSON
         StringBuilder minifiedJson = new StringBuilder();
         boolean inQuotes = false;
 
