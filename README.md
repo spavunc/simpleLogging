@@ -10,7 +10,7 @@ To use it in your project, import a maven dependency of the last stable release.
 <dependency>
   <groupId>com.simple</groupId>
   <artifactId>logging</artifactId>
-  <version>0.0.3</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
