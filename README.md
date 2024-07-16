@@ -276,12 +276,12 @@ All of these may contain endless amount of arguments, and you may use placeholde
 
 ### All of these utility methods are static, so you don't need to instantiate anything!
 
-#### Possible issues
+# Possible issues
 If you're using a SecurityFilterChain in your project, ensure that your requestMatchers are defined. Example:
 ```
 .requestMatchers(new AntPathRequestMatcher("/api/**"))
 //instead of
-.requestMatchers(("/api/**") 
+.requestMatchers("/api/**") 
 ```
 Otherwise, you might get an error like the following:
 ```
