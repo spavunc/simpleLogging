@@ -275,3 +275,16 @@ Log.error("An error occurred: %s", "you may also use %s as a placeholder for par
 All of these may contain endless amount of arguments, and you may use placeholders '%s' and '{}' in any of them.
 
 ### All of these utility methods are static, so you don't need to instantiate anything!
+
+#### Possible issues
+If you're using a SecurityFilterChain in your project, ensure that your requestMatchers are defined. Example:
+```
+.requestMatchers(new AntPathRequestMatcher("/api/**"))
+//instead of
+.requestMatchers(("/api/**") 
+```
+Otherwise, you might get an error like the following:
+```
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.security.web.SecurityFilterChain]: Factory method 'filterChain' threw exception with message: This method cannot decide whether these patterns are Spring MVC patterns or not. If this endpoint is a Spring MVC endpoint, please use requestMatchers(MvcRequestMatcher); otherwise, please use requestMatchers(AntPathRequestMatcher).
+```
+
