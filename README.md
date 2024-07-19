@@ -1,6 +1,6 @@
 # Simple logger
 
-Welcome to Simple Logger, a Spring Boot plugin that will set up logging in your application with just one annotation! <br />
+Welcome to Simple Logger, a Spring Boot plugin/service that will set up logging in your application with just one annotation! <br />
 For this plugin to work in your project, it requires the following:
 * Java 17 or higher
 * Spring Boot 3.1.4 or higher
@@ -13,10 +13,6 @@ To use it in your project, import a maven dependency of the last stable release.
   <version>0.8.0</version>
 </dependency>
 ```
-
-## Releases
-MASTER branch will always be the stable release branch. <br />
-Use DEVELOP branch at your own risk!
 
 ## Getting started
 
