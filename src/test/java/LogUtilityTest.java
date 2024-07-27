@@ -1,4 +1,6 @@
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.simple.logging.LoggingApplication;
+import com.simple.logging.application.model.CustomLogProperties;
 import com.simple.logging.application.utility.LogUtility;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.io.TempDir;
@@ -9,7 +11,10 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = {LoggingApplication.class})
@@ -21,6 +26,11 @@ class LogUtilityTest {
     @BeforeEach
     void setUp() {
         LogUtility.UtilityObjects.setObjects(tempDir.toString(), "testApp");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        CustomLogProperties.clearIgnoredProperties();
     }
 
     @Test
@@ -173,5 +183,40 @@ class LogUtilityTest {
         );
 
         assertEquals(expectedFiles, filteredLogFiles);
+    }
+
+    @Test
+    void testRemoveIgnoredPropertiesFromJson() throws Exception {
+        String jsonString = "{\"key1\":\"value1\",\"key2\":\"value2\",\"key3\":\"value3\"}";
+        CustomLogProperties.addIgnoredProperty("key2");
+
+        String result = LogUtility.removeIgnoredPropertiesFromJson(jsonString);
+
+        String expectedJsonString = "{\"key1\":\"value1\",\"key3\":\"value3\"}";
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> resultMap = objectMapper.readValue(result, HashMap.class);
+        Map<String, Object> expectedMap = objectMapper.readValue(expectedJsonString, HashMap.class);
+        assertEquals(expectedMap, resultMap);
+    }
+
+    @Test
+    void testRemoveIgnoredPropertiesFromJsonWithNoIgnoredProperties() throws Exception {
+        String jsonString = "{\"key1\":\"value1\",\"key2\":\"value2\"}";
+
+        String result = LogUtility.removeIgnoredPropertiesFromJson(jsonString);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> resultMap = objectMapper.readValue(result, HashMap.class);
+        Map<String, Object> expectedMap = objectMapper.readValue(jsonString, HashMap.class);
+        assertEquals(expectedMap, resultMap);
+    }
+
+    @Test
+    void testRemoveIgnoredPropertiesFromJsonWithException() {
+        String invalidJsonString = "{\"key1\":\"value1\",\"key2\":\"value2\""; // Invalid JSON
+
+        String result = LogUtility.removeIgnoredPropertiesFromJson(invalidJsonString);
+
+        assertEquals(invalidJsonString, result);
     }
 }
