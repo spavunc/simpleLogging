@@ -380,4 +380,21 @@ public class LogUtility {
             return jsonString;
         }
     }
+
+    /**
+     * Retrieves custom log properties and removes any properties that are marked as ignored.
+     *
+     * <p>This method fetches a map of custom log properties and then removes entries
+     * whose keys are listed in the ignored properties set. The resulting map contains
+     * only those properties that are not ignored.
+     *
+     * @return a map containing the custom log properties with the ignored properties removed.
+     */
+    public static Map<String, String> getCustomLogPropertiesWithoutIgnored() {
+        Map<String, String> customLogProps = CustomLogProperties.getCustomProperties();
+        for(String propertyName : CustomLogProperties.getIgnoredProperties()) {
+            customLogProps.remove(propertyName);
+        }
+        return customLogProps;
+    }
 }

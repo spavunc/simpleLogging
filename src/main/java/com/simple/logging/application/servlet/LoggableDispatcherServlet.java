@@ -86,7 +86,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                      HandlerExecutionChain handler) {
 
         String uuid = UUID.randomUUID().toString();
-        Map<String, String> customProperties = CustomLogProperties.getCustomProperties();
+        Map<String, String> customProperties = LogUtility.getCustomLogPropertiesWithoutIgnored();
 
         Payload log = Payload.builder()
                 .httpMethod(requestToCache.getMethod())
