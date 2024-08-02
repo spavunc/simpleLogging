@@ -10,6 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+
 /**
  * SimpleLoggingConfiguration is a configuration class that sets up a logging dispatcher servlet
  * with configurable parameters for logging file size, string size, file path, charset, and cache history logs.
@@ -20,7 +24,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
     private final Integer maxFileSizeMb;
     private final Integer maxStringSizeMb;
     private final String logFilePath;
-    private final String charset;
+    private final Charset charset;
     private final Integer maxCacheHistoryLogs;
     private final Integer logRetentionLengthInDays;
     private final String logDeletionCronScheduler;
@@ -67,7 +71,13 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
         this.maxFileSizeMb = maxFileSizeMb;
         this.maxStringSizeMb = maxStringSizeMb;
         this.logFilePath = logFilePath;
-        this.charset = charset;
+        Charset tempCharset;
+        try {
+            tempCharset = Charset.forName(charset);
+        } catch (UnsupportedCharsetException ex) {
+            tempCharset = StandardCharsets.UTF_8;
+        }
+        this.charset = tempCharset;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
         this.logRetentionLengthInDays = logRetentionLengthInDays;
         this.logDeletionCronScheduler = logDeletionCronScheduler;
@@ -97,7 +107,7 @@ public class SimpleLoggingConfiguration implements WebMvcConfigurer {
      */
     @Bean(name = "loggingDispatcherServlet")
     public DispatcherServlet dispatcherServlet() {
-        return new LoggableDispatcherServlet(maxStringSizeMb, maxCacheHistoryLogs);
+        return new LoggableDispatcherServlet(maxStringSizeMb, maxCacheHistoryLogs, charset);
     }
 
     /**

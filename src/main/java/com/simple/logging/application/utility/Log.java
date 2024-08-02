@@ -17,7 +17,7 @@ public class Log {
 
     private final Integer maxFileSizeMb;
     private final String logFilePath;
-    private final String charset;
+    private final Charset charset;
     private final String applicationName;
     private final String loggingLevel;
     private final boolean logToConsole;
@@ -34,7 +34,7 @@ public class Log {
      * @param maxBackupFiles  maximum number of backup files.
      */
     public Log(Integer maxFileSizeMb, String logFilePath,
-               String charset, String applicationName,
+               Charset charset, String applicationName,
                String loggingLevel,
                boolean logToConsole,
                Integer maxBackupFiles) {
@@ -163,7 +163,7 @@ public class Log {
         try {
             // Create FileHandler with size limit and rotating file pattern
             FileHandler fileHandler = new CustomFileHandler(Paths.get(logFilePath), maxFileSizeMb, maxBackupFiles,
-                    Charset.forName(charset), applicationName);
+                    charset, applicationName);
             // Add the FileHandler to the logger.
             LOGGER.addHandler(fileHandler);
             setLoggingLevel();
