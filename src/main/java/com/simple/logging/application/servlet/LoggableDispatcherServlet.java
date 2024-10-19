@@ -16,6 +16,7 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      */
     @Override
-    protected void doDispatch(@NotNull HttpServletRequest request,
-                              @NotNull HttpServletResponse response) {
+    protected void doDispatch(HttpServletRequest request,
+                              HttpServletResponse response) throws IOException {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -70,6 +71,9 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         } catch (Exception ex) {
             Log.error(String.format("Exception occurred - %s", ex.getMessage()), ex);
         } finally {
+            // Copy response content to the original response
+            ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
+            responseWrapper.copyBodyToResponse(); // This is critical
             // Clear custom properties after logging
             CustomLogProperties.clearCustomProperties();
         }
@@ -184,7 +188,6 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
         HandlerExecutionChain handler = getHandler(request);
         if (handler != null && handler.getHandler() instanceof HandlerMethod handlerMethod) {
-            handlerMethod = (HandlerMethod) handler.getHandler();
             if (handlerMethod.getBean().getClass().isAnnotationPresent(IgnoreLogging.class)) {
                 return false;
             } else
