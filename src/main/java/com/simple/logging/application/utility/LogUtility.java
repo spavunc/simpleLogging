@@ -1,5 +1,7 @@
 package com.simple.logging.application.utility;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.simple.logging.application.model.CustomLogProperties;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,7 +13,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -349,5 +353,48 @@ public class LogUtility {
         }
 
         return minifiedJson.toString();
+    }
+
+    /**
+     * Removes properties specified in the ignored properties list from the given JSON string.
+     * <p>
+     * This method parses the JSON string into a map, removes the properties listed in
+     * {@link CustomLogProperties#getIgnoredProperties()}, and then converts the map back to a JSON string.
+     * If an exception occurs during this process, the original JSON string is returned.
+     * </p>
+     *
+     * @param jsonString the input JSON string from which properties need to be removed
+     * @return a new JSON string with the ignored properties removed, or the original JSON string if an error occurs
+     */
+    public static String removeIgnoredPropertiesFromJson(String jsonString) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> map = objectMapper.readValue(jsonString, HashMap.class);
+            for(String propertyName : CustomLogProperties.getIgnoredProperties()) {
+                map.remove(propertyName);
+            }
+            return objectMapper.writeValueAsString(map);
+        } catch (Exception e) {
+            Log.error("Something went wrong when trying to remove ignored properties" +
+                          " from the payload!");
+            return jsonString;
+        }
+    }
+
+    /**
+     * Retrieves custom log properties and removes any properties that are marked as ignored.
+     *
+     * <p>This method fetches a map of custom log properties and then removes entries
+     * whose keys are listed in the ignored properties set. The resulting map contains
+     * only those properties that are not ignored.
+     *
+     * @return a map containing the custom log properties with the ignored properties removed.
+     */
+    public static Map<String, String> getCustomLogPropertiesWithoutIgnored() {
+        Map<String, String> customLogProps = CustomLogProperties.getCustomProperties();
+        for(String propertyName : CustomLogProperties.getIgnoredProperties()) {
+            customLogProps.remove(propertyName);
+        }
+        return customLogProps;
     }
 }

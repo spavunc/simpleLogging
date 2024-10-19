@@ -16,7 +16,8 @@ import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import org.springframework.web.util.WebUtils;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import java.util.UUID;
 public class LoggableDispatcherServlet extends DispatcherServlet {
     private final Integer maxStringSizeMb;
     private final Integer maxCacheHistoryLogs;
+    private final transient Charset charset;
 
     /**
      * Constructs a new LoggableDispatcherServlet with specified logging configurations.
@@ -39,9 +41,11 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param maxStringSizeMb     the maximum size of the request/response body to be logged in megabytes.
      * @param maxCacheHistoryLogs the maximum number of logs to be cached in memory.
      */
-    public LoggableDispatcherServlet(Integer maxStringSizeMb, Integer maxCacheHistoryLogs) {
+    public LoggableDispatcherServlet(Integer maxStringSizeMb, Integer maxCacheHistoryLogs,
+        Charset charset) {
         this.maxStringSizeMb = maxStringSizeMb * 1024 * 1024;
         this.maxCacheHistoryLogs = maxCacheHistoryLogs;
+        this.charset = charset;
     }
 
     /**
@@ -51,8 +55,8 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      * @param response the HTTP response.
      */
     @Override
-    protected void doDispatch(@NotNull HttpServletRequest request,
-                              @NotNull HttpServletResponse response) {
+    protected void doDispatch(HttpServletRequest request,
+                              HttpServletResponse response) throws IOException {
         if (!(request instanceof ContentCachingRequestWrapper)) {
             request = new ContentCachingRequestWrapper(request);
         }
@@ -67,8 +71,11 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
         } catch (Exception ex) {
             Log.error(String.format("Exception occurred - %s", ex.getMessage()), ex);
         } finally {
+            // Copy response content to the original response
+            ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
+            responseWrapper.copyBodyToResponse(); // This is critical
             // Clear custom properties after logging
-            CustomLogProperties.clear();
+            CustomLogProperties.clearCustomProperties();
         }
     }
 
@@ -83,7 +90,7 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
                      HandlerExecutionChain handler) {
 
         String uuid = UUID.randomUUID().toString();
-        Map<String, String> customProperties = CustomLogProperties.getProperties();
+        Map<String, String> customProperties = LogUtility.getCustomLogPropertiesWithoutIgnored();
 
         Payload log = Payload.builder()
                 .httpMethod(requestToCache.getMethod())
@@ -153,21 +160,21 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
      */
     private void printWrapper(byte[] byteArray, boolean isPayloadResponse, Payload log) {
         if (byteArray.length < maxStringSizeMb) {
-            String jsonStringFromByteArray = new String(byteArray, StandardCharsets.UTF_8);
+            String jsonString = LogUtility.removeIgnoredPropertiesFromJson(new String(byteArray, charset));
             String payloadMarker = isPayloadResponse ?
                     log.getUuid() + " RESPONSE BODY: {}" :
                     log.getUuid() + " REQUEST BODY: {}";
-            if (!jsonStringFromByteArray.isBlank()) {
-                Log.info(payloadMarker, LogUtility.minifyJsonString(jsonStringFromByteArray));
+            if (!jsonString.isBlank()) {
+                Log.info(payloadMarker, LogUtility.minifyJsonString(jsonString));
             }
             // Check whether the payload is a response or a request
             if (isPayloadResponse) {
-                log.setResponseBody(LogUtility.minifyJsonString(jsonStringFromByteArray));
+                log.setResponseBody(LogUtility.minifyJsonString(jsonString));
             } else {
-                log.setRequestBody(LogUtility.minifyJsonString(jsonStringFromByteArray));
+                log.setRequestBody(LogUtility.minifyJsonString(jsonString));
             }
         } else if (byteArray.length > maxStringSizeMb) {
-            Log.info("Content too long!");
+            Log.warn("Content too long!");
         }
     }
 
@@ -181,7 +188,6 @@ public class LoggableDispatcherServlet extends DispatcherServlet {
     private boolean shouldLogRequest(HttpServletRequest request) throws Exception {
         HandlerExecutionChain handler = getHandler(request);
         if (handler != null && handler.getHandler() instanceof HandlerMethod handlerMethod) {
-            handlerMethod = (HandlerMethod) handler.getHandler();
             if (handlerMethod.getBean().getClass().isAnnotationPresent(IgnoreLogging.class)) {
                 return false;
             } else
