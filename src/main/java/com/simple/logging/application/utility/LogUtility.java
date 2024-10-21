@@ -369,6 +369,9 @@ public class LogUtility {
     public static String removeIgnoredPropertiesFromJson(String jsonString) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
+            if (jsonString.isBlank()) {
+                return jsonString;
+            }
             Map<String, Object> map = objectMapper.readValue(jsonString, HashMap.class);
             for(String propertyName : CustomLogProperties.getIgnoredProperties()) {
                 map.remove(propertyName);
